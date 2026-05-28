@@ -1,4 +1,4 @@
-# Strong Academy — Claude Context
+ # Strong Academy — Claude Context
 
 ## Vision
 Premium mobile-first Lernplattform für Zinzino-Partner. Editorial, ruhig, hochwertig — kein SaaS-Dashboard, kein MLM-Backoffice.
