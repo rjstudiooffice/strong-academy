@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { navItems } from "@/lib/nav"
 import { NavIcon } from "./NavIcon"
@@ -22,8 +23,8 @@ export function Sidebar({ showTeam, leadershipUnlocked }: Props) {
       {/* Logo */}
       <div className="px-6 pt-8 pb-6">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#5B2D8E] flex items-center justify-center shrink-0">
-            <span className="text-white text-xs font-semibold tracking-wide">SA</span>
+          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
+            <Image src="/images/logo.png" alt="Strong Academy" width={32} height={32} className="w-full h-full object-cover" />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-[#1A1714] leading-none">Strong Academy</p>

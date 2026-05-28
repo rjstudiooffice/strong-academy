@@ -62,8 +62,10 @@ export default async function CategoryPage({
       <section className="rounded-2xl overflow-hidden border border-[#E8E2D9]">
         <MediaCover
           gradient={category.cover}
+          imageSrc={category.heroImage}
           index={foundation ? category.index : undefined}
-          className="h-52"
+          objectPosition="center 30%"
+          className="h-52 sm:h-64"
         />
 
         <div className="bg-[#F5F0E8] px-8 py-7">

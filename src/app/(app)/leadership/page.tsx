@@ -131,6 +131,8 @@ function LeadershipUnlocked() {
             >
               <MediaCover
                 gradient={cat.cover}
+                imageSrc={cat.coverImage}
+                darkTint
                 index={cat.index}
                 className="h-44 shrink-0"
               />

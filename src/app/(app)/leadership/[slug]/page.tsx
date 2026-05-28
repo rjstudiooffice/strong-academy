@@ -32,7 +32,14 @@ export default async function LeadershipCategoryPage({
 
       {/* Hero */}
       <section className="rounded-2xl overflow-hidden border border-[#38322A]">
-        <MediaCover gradient={category.cover} index={category.index} className="h-52" />
+        <MediaCover
+          gradient={category.cover}
+          imageSrc={category.heroImage}
+          darkTint
+          index={category.index}
+          objectPosition="center 30%"
+          className="h-52 sm:h-64"
+        />
         <div className="bg-[#242019] px-8 py-7">
           <p className="text-[10px] font-semibold text-[#9B72CC] uppercase tracking-widest mb-3">
             {category.tagline}

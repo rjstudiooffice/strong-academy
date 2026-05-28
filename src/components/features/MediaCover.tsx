@@ -1,31 +1,63 @@
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 type MediaCoverProps = {
-  gradient: string           // e.g. "from-[#9EB88C] to-[#7A9C68]"
-  index?: string             // watermark number — "01", "03", etc.
-  className?: string         // caller controls size (h-44, aspect-video, etc.)
-  children?: React.ReactNode // play button, overlaid UI
+  gradient: string           // gradient fallback (always applied as bg — acts as placeholder + bleed color)
+  imageSrc?: string          // real image path — if provided, renders on top of gradient
+  index?: string             // watermark number
+  className?: string
+  children?: React.ReactNode
+  objectPosition?: string    // focal point, default "center"
+  darkTint?: boolean         // Leadership: additional dark overlay for depth
 }
 
-/**
- * Shared cover surface for all media in the platform.
- * Handles the overlay system consistently — warm radial light,
- * ambient depth shadow, bottom fade, optional watermark number.
- */
-export function MediaCover({ gradient, index, className, children }: MediaCoverProps) {
+export function MediaCover({
+  gradient,
+  imageSrc,
+  index,
+  className,
+  children,
+  objectPosition = "center",
+  darkTint = false,
+}: MediaCoverProps) {
   return (
     <div className={cn("relative overflow-hidden bg-gradient-to-br", gradient, className)}>
-      {/* Warm diffused light — top-left origin */}
-      <div className="absolute inset-0 pointer-events-none
-        bg-[radial-gradient(ellipse_90%_70%_at_15%_15%,_rgba(255,250,240,0.22)_0%,_transparent_62%)]" />
 
-      {/* Ambient shadow — bottom-right origin */}
-      <div className="absolute inset-0 pointer-events-none
-        bg-[radial-gradient(ellipse_55%_45%_at_88%_88%,_rgba(0,0,0,0.09)_0%,_transparent_65%)]" />
+      {/* Real image */}
+      {imageSrc && (
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          className="object-cover"
+          style={{ objectPosition }}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
+          priority={false}
+        />
+      )}
 
-      {/* Depth fade — bottom edge */}
-      <div className="absolute bottom-0 left-0 right-0 h-2/5 pointer-events-none
-        bg-gradient-to-t from-black/[0.14] via-black/[0.04] to-transparent" />
+      {/* Warm diffused light — gradient-only mode */}
+      {!imageSrc && (
+        <div className="absolute inset-0 pointer-events-none
+          bg-[radial-gradient(ellipse_90%_70%_at_15%_15%,_rgba(255,250,240,0.22)_0%,_transparent_62%)]" />
+      )}
+
+      {/* Leadership dark tint — cinematic depth */}
+      {darkTint && (
+        <div className="absolute inset-0 pointer-events-none bg-[#1A1714]/28" />
+      )}
+
+      {/* Ambient shadow — bottom-right */}
+      <div className="absolute inset-0 pointer-events-none
+        bg-[radial-gradient(ellipse_55%_45%_at_88%_88%,_rgba(0,0,0,0.12)_0%,_transparent_65%)]" />
+
+      {/* Depth fade — bottom edge (stronger when image present) */}
+      <div className={cn(
+        "absolute bottom-0 left-0 right-0 h-2/5 pointer-events-none bg-gradient-to-t",
+        imageSrc
+          ? "from-black/[0.32] via-black/[0.10] to-transparent"
+          : "from-black/[0.14] via-black/[0.04] to-transparent"
+      )} />
 
       {/* Index watermark */}
       {index && (

@@ -3,6 +3,7 @@
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 function RegisterForm() {
   const params     = useSearchParams()
@@ -14,9 +15,7 @@ function RegisterForm() {
       <div className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm text-center space-y-5">
           <div className="flex items-center gap-2.5 justify-center mb-10">
-            <div className="w-8 h-8 rounded-lg bg-[#5B2D8E] flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-semibold tracking-wide">SA</span>
-            </div>
+            <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><Image src="/images/logo.png" alt="Strong Academy" width={32} height={32} className="w-full h-full object-cover" /></div>
             <span className="text-[14px] font-semibold text-[#1A1714]">Strong Academy</span>
           </div>
           <h1 className="text-[1.5rem] font-semibold text-[#1A1714] tracking-tight">
@@ -42,9 +41,7 @@ function RegisterForm() {
 
         {/* Brand mark */}
         <div className="flex items-center gap-2.5 mb-10">
-          <div className="w-8 h-8 rounded-lg bg-[#5B2D8E] flex items-center justify-center shrink-0">
-            <span className="text-white text-xs font-semibold tracking-wide">SA</span>
-          </div>
+          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><Image src="/images/logo.png" alt="Strong Academy" width={32} height={32} className="w-full h-full object-cover" /></div>
           <span className="text-[14px] font-semibold text-[#1A1714]">Strong Academy</span>
         </div>
 

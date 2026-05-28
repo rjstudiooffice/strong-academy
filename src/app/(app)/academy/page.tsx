@@ -45,7 +45,7 @@ export default function AcademyPage() {
                 href={`/academy/${cat.slug}`}
                 className="group rounded-2xl overflow-hidden border border-[#E8E2D9] hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex flex-col"
               >
-                <MediaCover gradient={cat.cover} index={cat.index} className="h-44 shrink-0" />
+                <MediaCover gradient={cat.cover} imageSrc={cat.coverImage} index={cat.index} className="h-44 shrink-0" />
                 <div className="bg-[#F5F0E8] px-6 py-5 flex flex-col flex-1">
                   <div className="flex-1">
                     <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-2">
@@ -105,8 +105,7 @@ export default function AcademyPage() {
               href={`/academy/${cat.slug}`}
               className="group rounded-2xl overflow-hidden border border-[#E8E2D9] hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex flex-col"
             >
-              {/* No index watermark for library */}
-              <MediaCover gradient={cat.cover} className="h-40 shrink-0" />
+              <MediaCover gradient={cat.cover} imageSrc={cat.coverImage} className="h-40 shrink-0" />
               <div className="bg-[#F5F0E8] px-6 py-5 flex flex-col flex-1">
                 <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-2">
                   {cat.tagline}

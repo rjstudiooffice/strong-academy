@@ -1,5 +1,6 @@
 import { ArrowRight, Play } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
+import Image from "next/image"
 import Link from "next/link"
 import { getCategories, getFoundationCategories, progressPct, getOverallProgress, getNextLesson, isFoundation } from "@/lib/data/academy"
 import { getCurrentUser } from "@/lib/data/user"
@@ -32,6 +33,19 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden rounded-2xl bg-[#F5F0E8] border border-[#E8E2D9]">
+        {/* Background hero image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/startseite_hero.png"
+            alt=""
+            fill
+            className="object-cover object-right"
+            priority
+          />
+          {/* Left-to-right fade — keeps text readable */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F5F0E8] via-[#F5F0E8]/90 sm:via-[#F5F0E8]/75 to-transparent" />
+        </div>
+
         {/* Desktop: Invite button top-right, absolute */}
         <div className="hidden sm:block absolute top-5 right-5 z-20">
           <InviteButton inviteLink={inviteLink} />
@@ -63,7 +77,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="absolute inset-y-0 right-0 w-2/5 bg-gradient-to-l from-[#EDE8DF]/70 to-transparent pointer-events-none" />
       </section>
 
       {/* Progress */}
