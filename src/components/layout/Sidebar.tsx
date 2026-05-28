@@ -1,0 +1,68 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { navItems } from "@/lib/nav"
+import { NavIcon } from "./NavIcon"
+import { cn } from "@/lib/utils"
+
+type Props = { showTeam: boolean }
+
+export function Sidebar({ showTeam }: Props) {
+  const pathname = usePathname()
+
+  const allItems = [
+    ...navItems,
+    ...(showTeam ? [{ label: "Mein Team", href: "/team", icon: "users" }] : []),
+  ]
+
+  return (
+    <aside className="hidden md:flex flex-col w-60 shrink-0 bg-[#F5F0E8] border-r border-[#E8E2D9] h-screen sticky top-0">
+      {/* Logo */}
+      <div className="px-6 pt-8 pb-6">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#5B2D8E] flex items-center justify-center shrink-0">
+            <span className="text-white text-xs font-semibold tracking-wide">SA</span>
+          </div>
+          <div>
+            <p className="text-[13px] font-semibold text-[#1A1714] leading-none">Strong Academy</p>
+            <p className="text-[11px] text-[#9E9188] mt-0.5 leading-none">Lernplattform</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 space-y-0.5">
+        {allItems.map((item) => {
+          const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                isActive
+                  ? "bg-white text-[#5B2D8E] shadow-sm"
+                  : "text-[#6B5E52] hover:bg-[#EDE8DF] hover:text-[#1A1714]"
+              )}
+            >
+              <NavIcon
+                name={item.icon}
+                className={cn("w-4 h-4 shrink-0", isActive ? "text-[#5B2D8E]" : "text-[#9E9188]")}
+              />
+              {item.label}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Bottom */}
+      <div className="px-3 pb-6 border-t border-[#E8E2D9] pt-3 mt-3">
+        <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#6B5E52] hover:bg-[#EDE8DF] hover:text-[#1A1714] transition-all duration-150">
+          <NavIcon name="logout" className="w-4 h-4 shrink-0 text-[#9E9188]" />
+          Abmelden
+        </button>
+      </div>
+    </aside>
+  )
+}
