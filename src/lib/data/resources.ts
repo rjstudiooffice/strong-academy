@@ -26,16 +26,20 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     description: "Fachliche Unterlagen zu Strong OG — für dein Wissen und deine Gespräche.",
   },
   {
-    id: "flyer-materialien",
-    label: "Flyer & Materialien",
-    description: "Aufbereitete Materialien für Präsentationen und Kundengespräche.",
+    id: "infomaterial-kunden",
+    label: "Infomaterial für Kunden",
+    description: "Professionell aufbereitete Unterlagen für Kundengespräche und persönliche Weitergabe.",
+  },
+  {
+    id: "gesundheitskonzept",
+    label: "Gesundheitskonzept",
+    description: "Vorlagen, Fragebögen und strukturierte Unterlagen für die individuelle Gesundheitsberatung deiner Kunden.",
   },
 ]
 
 // ─── Resources ───────────────────────────────────────────────────────────────
 
 const RESOURCES: Resource[] = [
-  // Produktinformationen
   {
     id: "produktuebersicht-strong-og",
     title: "Produktübersicht Strong OG",
@@ -44,44 +48,6 @@ const RESOURCES: Resource[] = [
     fileType: "PDF",
     fileSize: "2.4 MB",
     category: "produktinformationen",
-  },
-  {
-    id: "wissenschaftliche-grundlagen",
-    title: "Wissenschaftliche Grundlagen",
-    description:
-      "Hintergrundwissen zur zellulären Mikronährstoffversorgung und zur Bedeutung von Bioverfügbarkeit.",
-    fileType: "PDF",
-    fileSize: "3.1 MB",
-    category: "produktinformationen",
-  },
-  {
-    id: "bioverfuegbarkeit-erklaert",
-    title: "Bioverfügbarkeit erklärt",
-    description:
-      "Warum die Darreichungsform entscheidend ist — und was flüssige Vitalstoffversorgung konkret bedeutet.",
-    fileType: "PDF",
-    fileSize: "1.8 MB",
-    category: "produktinformationen",
-  },
-
-  // Flyer & Materialien
-  {
-    id: "produktflyer-strong-og",
-    title: "Produktflyer Strong OG",
-    description:
-      "Kompakter, hochwertig gestalteter Überblick — ideal als Gesprächsgrundlage mit Interessenten.",
-    fileType: "PDF",
-    fileSize: "890 KB",
-    category: "flyer-materialien",
-  },
-  {
-    id: "praesentation-erstgespraech",
-    title: "Präsentation Erstgespräch",
-    description:
-      "Strukturierte Gesprächsunterlage für das erste Kennenlernen — klar, ruhig, überzeugend.",
-    fileType: "PPTX",
-    fileSize: "5.2 MB",
-    category: "flyer-materialien",
   },
 ]
 
@@ -99,22 +65,9 @@ const HANDOUTS: Handout[] = [
   {
     id: "zusammenfassung-strong-og",
     title: "Zusammenfassung: Was ist Strong OG?",
-    description: "Kompakte Lernzusammenfassung der ersten zwei Lektionen.",
+    description: "Kompakte Lernzusammenfassung zur ersten Lektion.",
     relatedLesson: "/academy/produktwissen/was-ist-strong-og",
     fileSize: "420 KB",
-  },
-  {
-    id: "mineralien-cheatsheet",
-    title: "Infoblatt: Mineralien & Mikronährstoffe",
-    description: "Schnellübersicht der wichtigsten Wirkstoffe und ihrer Funktion auf Zellebene.",
-    relatedLesson: "/academy/produktwissen/mineralien-mikronährstoffe",
-    fileSize: "310 KB",
-  },
-  {
-    id: "fragen-antworten",
-    title: "Häufige Fragen & Antworten",
-    description: "Die meistgestellten Fragen zu Strong OG — prägnant für den schnellen Nachschlag.",
-    fileSize: "280 KB",
   },
 ]
 

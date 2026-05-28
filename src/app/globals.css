@@ -90,8 +90,6 @@
 
   html {
     @apply font-sans;
-    /* Momentum scrolling on iOS */
-    -webkit-overflow-scrolling: touch;
   }
 
   body {

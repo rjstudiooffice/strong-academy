@@ -25,6 +25,10 @@ export function userInitials(u: User): string {
   return `${u.firstName[0]}${u.lastName[0]}`.toUpperCase()
 }
 
+export function isAdmin(u: User): boolean {
+  return u.role === "admin"
+}
+
 // ─── Mock data — swap this for a Supabase profiles query ─────────────────────
 
 const MOCK_USER: User = {

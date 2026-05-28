@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { UserPlus, Copy, Check, X } from "lucide-react"
 
 type Props = { inviteLink: string }
@@ -20,7 +21,6 @@ export function InviteButton({ inviteLink }: Props) {
   useEffect(() => {
     if (!open) return
     document.body.style.overflow = "hidden"
-    // Focus the close button so keyboard users can dismiss immediately
     const t = setTimeout(() => closeRef.current?.focus(), 50)
     return () => {
       clearTimeout(t)
@@ -65,34 +65,37 @@ export function InviteButton({ inviteLink }: Props) {
         Partner einladen
       </button>
 
-      {/* Modal */}
-      {open && (
+      {/* Modal — rendered via Portal to escape all parent stacking contexts */}
+      {open && createPortal(
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Partner einladen"
-          className="fixed inset-0 z-50 flex items-end sm:items-start sm:justify-center sm:pt-[12vh] sm:px-5"
+          style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "flex-end" }}
+          className="sm:items-start sm:justify-center sm:pt-[12vh] sm:px-5"
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-[#1A1714]/25 backdrop-blur-[5px]"
+            style={{ position: "absolute", inset: 0 }}
+            className="bg-[#1A1714]/25 backdrop-blur-[5px]"
             onClick={() => setOpen(false)}
           />
 
           {/* Card — bottom sheet on mobile, centered modal on sm+ */}
           <div
             className="
-              relative z-10 w-full sm:max-w-[420px]
+              relative w-full sm:max-w-[420px]
               bg-[#FAF9F6]
               rounded-t-2xl sm:rounded-2xl
               border border-[#E8E2D9]
               shadow-[0_-4px_32px_rgba(26,23,20,0.10),_0_0_0_1px_rgba(26,23,20,0.04)]
               sm:shadow-[0_8px_48px_rgba(26,23,20,0.13),_0_2px_8px_rgba(26,23,20,0.06)]
               px-6 sm:px-7 pt-6 sm:pt-7
-              max-h-[82vh] overflow-y-auto
+              overflow-y-auto
             "
             style={{
-              /* Safe area at bottom — works on notch/Dynamic Island devices */
+              zIndex: 1,
+              maxHeight: "82dvh",
               paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -133,10 +136,7 @@ export function InviteButton({ inviteLink }: Props) {
               </p>
               <button
                 onClick={handleCopy}
-                className="
-                  flex items-center gap-1.5 text-[12px] font-medium shrink-0
-                  transition-colors focus:outline-none
-                "
+                className="flex items-center gap-1.5 text-[12px] font-medium shrink-0 transition-colors focus:outline-none"
                 style={{ color: copied ? "#5A7A5A" : "#5B2D8E" }}
               >
                 {copied
@@ -152,9 +152,9 @@ export function InviteButton({ inviteLink }: Props) {
                 Bitte teile diesen Link ausschließlich mit deinen direkten Partnern.
               </p>
             </div>
-
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
