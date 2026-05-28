@@ -14,15 +14,15 @@ function InfoRow({
   action?: { label: string }
 }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-[#EDE8DF] last:border-0">
-      <div className="flex items-baseline gap-8">
-        <span className="text-[12px] font-medium text-[#B8AFA7] uppercase tracking-widest w-24 shrink-0">
+    <div className="flex items-center justify-between gap-3 py-4 border-b border-[#EDE8DF] last:border-0">
+      <div className="flex items-baseline gap-5 sm:gap-8 min-w-0 flex-1">
+        <span className="text-[11px] sm:text-[12px] font-medium text-[#B8AFA7] uppercase tracking-widest w-16 sm:w-24 shrink-0">
           {label}
         </span>
-        <span className="text-[14px] text-[#1A1714]">{value}</span>
+        <span className="text-[14px] text-[#1A1714] truncate min-w-0">{value}</span>
       </div>
       {action && (
-        <button className="text-[12px] text-[#5B2D8E] hover:text-[#4A2478] font-medium transition-colors shrink-0">
+        <button className="text-[12px] text-[#5B2D8E] hover:text-[#4A2478] font-medium transition-colors shrink-0 ml-1">
           {action.label}
         </button>
       )}
@@ -42,13 +42,13 @@ function SettingsRow({
   danger?: boolean
 }) {
   return (
-    <button className="w-full flex items-center justify-between py-4 border-b border-[#EDE8DF] last:border-0 group text-left">
-      <div className="flex items-baseline gap-8">
-        <span className="text-[12px] font-medium text-[#B8AFA7] uppercase tracking-widest w-24 shrink-0">
+    <button className="w-full flex items-center justify-between gap-3 py-4 border-b border-[#EDE8DF] last:border-0 group text-left">
+      <div className="flex items-baseline gap-5 sm:gap-8 min-w-0 flex-1">
+        <span className="text-[11px] sm:text-[12px] font-medium text-[#B8AFA7] uppercase tracking-widest w-16 sm:w-24 shrink-0">
           {label}
         </span>
         {value && (
-          <span className="text-[14px] text-[#6B5E52]">{value}</span>
+          <span className="text-[14px] text-[#6B5E52] truncate min-w-0">{value}</span>
         )}
       </div>
       <span className={`flex items-center gap-1 text-[12px] font-medium transition-colors ${

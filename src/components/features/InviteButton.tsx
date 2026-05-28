@@ -87,8 +87,13 @@ export function InviteButton({ inviteLink }: Props) {
               border border-[#E8E2D9]
               shadow-[0_-4px_32px_rgba(26,23,20,0.10),_0_0_0_1px_rgba(26,23,20,0.04)]
               sm:shadow-[0_8px_48px_rgba(26,23,20,0.13),_0_2px_8px_rgba(26,23,20,0.06)]
-              px-6 sm:px-7 pt-7 pb-safe
+              px-6 sm:px-7 pt-6 sm:pt-7
+              max-h-[82vh] overflow-y-auto
             "
+            style={{
+              /* Safe area at bottom — works on notch/Dynamic Island devices */
+              paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Pull handle — mobile only */}

@@ -29,8 +29,8 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden rounded-2xl bg-[#F5F0E8] border border-[#E8E2D9]">
-        {/* Invite button — top-right of hero */}
-        <div className="absolute top-5 right-5 z-20">
+        {/* Desktop: Invite button top-right, absolute */}
+        <div className="hidden sm:block absolute top-5 right-5 z-20">
           <InviteButton inviteLink={inviteLink} />
         </div>
 
@@ -45,12 +45,20 @@ export default function HomePage() {
           <p className="mt-4 text-[#8C7E6F] text-[14px] sm:text-[15px] leading-relaxed max-w-sm">
             Wissen, das dein Leben verändert. Entdecke Inhalte, die dich und dein Business auf das nächste Level bringen.
           </p>
-          <Link
-            href="/academy"
-            className="mt-6 sm:mt-7 inline-flex items-center gap-2.5 bg-[#5B2D8E] text-white text-sm font-medium px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl hover:bg-[#4A2478] transition-colors"
-          >
-            Weiterlernen <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
-          </Link>
+
+          {/* Mobile: both buttons side by side, below description */}
+          <div className="mt-6 flex items-center gap-3 flex-wrap">
+            <Link
+              href="/academy"
+              className="inline-flex items-center gap-2.5 bg-[#5B2D8E] text-white text-sm font-medium px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl hover:bg-[#4A2478] transition-colors"
+            >
+              Weiterlernen <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+            </Link>
+            {/* Mobile only — desktop version is absolute top-right */}
+            <div className="sm:hidden">
+              <InviteButton inviteLink={inviteLink} />
+            </div>
+          </div>
         </div>
         <div className="absolute inset-y-0 right-0 w-2/5 bg-gradient-to-l from-[#EDE8DF]/70 to-transparent pointer-events-none" />
       </section>
