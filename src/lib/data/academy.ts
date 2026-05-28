@@ -42,6 +42,24 @@ export type LessonContext = {
   next: Lesson | null
 }
 
+// ─── Foundation / Library split ──────────────────────────────────────────────
+// Foundation = structured curriculum, counts toward Leadership unlock
+// Library    = open knowledge collection, no progress tracking
+
+const FOUNDATION_SLUGS = new Set(["produktwissen", "teamaufbau", "kommunikation"])
+
+export function isFoundation(cat: Category): boolean {
+  return FOUNDATION_SLUGS.has(cat.slug)
+}
+
+export function getFoundationCategories(): Category[] {
+  return CATEGORIES.filter(isFoundation)
+}
+
+export function getLibraryCategories(): Category[] {
+  return CATEGORIES.filter((c) => !isFoundation(c))
+}
+
 // ─── Computed helpers ────────────────────────────────────────────────────────
 
 export function lessonCount(cat: Category): number {
@@ -200,8 +218,9 @@ export function getAllLessonParams(): { slug: string; lessonSlug: string }[] {
 export type OverallProgress = { pct: number; done: number; total: number }
 
 export function getOverallProgress(): OverallProgress {
-  const total = CATEGORIES.reduce((s, c) => s + lessonCount(c), 0)
-  const done  = CATEGORIES.reduce((s, c) => s + completedCount(c), 0)
+  const foundation = CATEGORIES.filter(isFoundation)
+  const total = foundation.reduce((s, c) => s + lessonCount(c), 0)
+  const done  = foundation.reduce((s, c) => s + completedCount(c), 0)
   return { pct: total > 0 ? Math.round((done / total) * 100) : 0, done, total }
 }
 

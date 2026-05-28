@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowUpRight, FileText, Presentation } from "lucide-react"
+import { ArrowUpRight, FileText } from "lucide-react"
 import {
   RESOURCE_CATEGORIES,
   getResourcesByCategory,

@@ -50,7 +50,6 @@ const MOCK_TEAM: TeamMember[] = [
     categoryPcts: [
       { slug: "produktwissen",      name: "Produktwissen",      pct: 80 },
       { slug: "kommunikation",      name: "Kommunikation",      pct: 40 },
-      { slug: "gesundheitsgrundlagen", name: "Gesundheitsgrundlagen", pct: 20 },
     ],
   },
   {
@@ -63,7 +62,6 @@ const MOCK_TEAM: TeamMember[] = [
     completedLessons: 2,
     categoryPcts: [
       { slug: "produktwissen",      name: "Produktwissen",      pct: 60 },
-      { slug: "persoenliche-entwicklung", name: "Pers. Entwicklung", pct: 15 },
     ],
   },
   {

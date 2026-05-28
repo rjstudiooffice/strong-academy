@@ -6,14 +6,15 @@ import { UserPlus, Copy, Check, X } from "lucide-react"
 type Props = { inviteLink: string }
 
 export function InviteButton({ inviteLink }: Props) {
-  const [open,   setOpen]   = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [open,     setOpen]     = useState(false)
+  const [copied,   setCopied]   = useState(false)
+  const [fullLink, setFullLink] = useState(inviteLink)
   const closeRef = useRef<HTMLButtonElement>(null)
 
-  // Build the full shareable URL client-side so it works on any domain/port
-  const fullLink = typeof window !== "undefined"
-    ? `${window.location.origin}${inviteLink}`
-    : inviteLink
+  // Resolve full URL after mount — avoids SSR/hydration mismatch
+  useEffect(() => {
+    setFullLink(`${window.location.origin}${inviteLink}`)
+  }, [inviteLink])
 
   // Scroll-lock + focus management
   useEffect(() => {

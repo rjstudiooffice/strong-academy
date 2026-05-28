@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { ArrowLeft, Play, CheckCircle2, Circle, Clock } from "lucide-react"
-import { getCategoryBySlug, getCategories, lessonCount, completedCount, progressPct, type Lesson } from "@/lib/data/academy"
+import { getCategoryBySlug, getCategories, lessonCount, completedCount, progressPct, isFoundation, type Lesson } from "@/lib/data/academy"
 import { MediaCover } from "@/components/features/MediaCover"
 
 export function generateStaticParams() {
@@ -43,7 +43,8 @@ export default async function CategoryPage({
   const category = getCategoryBySlug(slug)
   if (!category) return null   // covered by generateStaticParams
 
-  const pct = progressPct(category)
+  const foundation = isFoundation(category)
+  const pct = foundation ? progressPct(category) : 0
 
   return (
     <div className="space-y-14 pt-2">
@@ -61,13 +62,13 @@ export default async function CategoryPage({
       <section className="rounded-2xl overflow-hidden border border-[#E8E2D9]">
         <MediaCover
           gradient={category.cover}
-          index={category.index}
+          index={foundation ? category.index : undefined}
           className="h-52"
         />
 
         <div className="bg-[#F5F0E8] px-8 py-7">
           <p className="text-[10px] font-semibold text-[#5B2D8E] uppercase tracking-widest mb-3">
-            {category.tagline}
+            {foundation ? category.tagline : "Wissensbibliothek"}
           </p>
           <h1 className="text-[1.65rem] sm:text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
             {category.name}
@@ -76,21 +77,23 @@ export default async function CategoryPage({
             {category.description}
           </p>
 
-          <div className="mt-6 flex items-center gap-5">
-            <div className="flex-1 max-w-xs">
-              <div className="h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-[#5B2D8E]/35 transition-all duration-700"
-                  style={{ width: `${pct}%` }}
-                />
+          {foundation && (
+            <div className="mt-6 flex items-center gap-5">
+              <div className="flex-1 max-w-xs">
+                <div className="h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#5B2D8E]/35 transition-all duration-700"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
               </div>
+              <p className="text-[13px] text-[#9E9188] shrink-0">
+                {lessonCount(category) > 0
+                  ? `${completedCount(category)} von ${lessonCount(category)} ${lessonCount(category) === 1 ? "Lektion" : "Lektionen"}`
+                  : "Inhalte folgen"}
+              </p>
             </div>
-            <p className="text-[13px] text-[#9E9188] shrink-0">
-              {lessonCount(category) > 0
-                ? `${completedCount(category)} von ${lessonCount(category)} ${lessonCount(category) === 1 ? "Lektion" : "Lektionen"}`
-                : "Inhalte folgen"}
-            </p>
-          </div>
+          )}
         </div>
       </section>
 
@@ -116,7 +119,7 @@ export default async function CategoryPage({
               {/* Cover */}
               <MediaCover
                 gradient={lesson.cover}
-                index={String(i + 1).padStart(2, "0")}
+                index={foundation ? String(i + 1).padStart(2, "0") : undefined}
                 className="w-full sm:w-52 h-36 sm:h-auto shrink-0"
               >
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -141,7 +144,7 @@ export default async function CategoryPage({
                     <Clock className="w-3 h-3" strokeWidth={1.75} />
                     {lesson.duration}
                   </span>
-                  <LessonStatus lesson={lesson} />
+                  {foundation && <LessonStatus lesson={lesson} />}
                 </div>
               </div>
             </Link>

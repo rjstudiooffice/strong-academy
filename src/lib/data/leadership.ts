@@ -96,3 +96,33 @@ export function getProgressToUnlock(): { current: number; needed: number; remain
     pct: Math.min(100, Math.round((current / needed) * 100)),
   }
 }
+
+export type LeadershipLesson = LeadershipCategory["lessons"][number]
+
+export type LeadershipLessonContext = {
+  category: LeadershipCategory
+  lesson: LeadershipLesson
+  index: number
+  prev: LeadershipLesson | null
+  next: LeadershipLesson | null
+}
+
+export function getLeadershipLessonContext(categorySlug: string, lessonSlug: string): LeadershipLessonContext | undefined {
+  const category = CATEGORIES.find((c) => c.slug === categorySlug)
+  if (!category) return undefined
+  const index = category.lessons.findIndex((l) => l.slug === lessonSlug)
+  if (index === -1) return undefined
+  return {
+    category,
+    lesson: category.lessons[index],
+    index,
+    prev: index > 0 ? category.lessons[index - 1] : null,
+    next: index < category.lessons.length - 1 ? category.lessons[index + 1] : null,
+  }
+}
+
+export function getAllLeadershipLessonParams(): { slug: string; lessonSlug: string }[] {
+  return CATEGORIES.flatMap((cat) =>
+    cat.lessons.map((l) => ({ slug: cat.slug, lessonSlug: l.slug }))
+  )
+}

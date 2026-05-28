@@ -1,18 +1,11 @@
 import { ArrowRight, Play } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
-import { getCategories, progressPct, getOverallProgress, getNextLesson } from "@/lib/data/academy"
+import { getCategories, getFoundationCategories, progressPct, getOverallProgress, getNextLesson, isFoundation } from "@/lib/data/academy"
 import { getCurrentUser } from "@/lib/data/user"
 import { getInviteLink } from "@/lib/data/team"
 import { CurrentDate } from "@/components/features/CurrentDate"
 import { InviteButton } from "@/components/features/InviteButton"
-
-// User-specific state — will come from Supabase later
-const recentItems = [
-  { category: "Produktwissen",      title: "Demnächst verfügbar",            href: "/academy/produktwissen" },
-  { category: "Produktwissen",      title: "Was ist Strong OG?",             href: "/academy/produktwissen/was-ist-strong-og" },
-  { category: "Kommunikation",      title: "Demnächst verfügbar",            href: "/academy/kommunikation" },
-]
 
 export default function HomePage() {
   const user          = getCurrentUser()
@@ -20,10 +13,20 @@ export default function HomePage() {
   const categories    = getCategories()
   const overall       = getOverallProgress()
   const nextLesson    = getNextLesson()
-  const activeProgress = categories
+
+  // Only Foundation categories count for progress display
+  const activeProgress = getFoundationCategories()
     .map((c) => ({ name: c.name, pct: progressPct(c) }))
     .filter((c) => c.pct > 0)
     .sort((a, b) => b.pct - a.pct)
+
+  // Derive from actual completed lessons — no fake placeholders
+  const recentItems = categories
+    .flatMap((cat) => cat.lessons
+      .filter((l) => l.status === "done" || l.status === "progress")
+      .map((l) => ({ category: cat.name, title: l.title, href: `/academy/${cat.slug}/${l.slug}` }))
+    )
+    .slice(0, 3)
   return (
     <div className="space-y-12">
 
@@ -139,43 +142,51 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Zuletzt angesehen */}
+      {/* Zuletzt angesehen — only when there's actual history */}
+      {recentItems.length > 0 && (
+        <section>
+          <div className="flex items-baseline justify-between mb-4">
+            <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest">
+              Zuletzt angesehen
+            </p>
+            <Link href="/academy" className="text-[12px] text-[#5B2D8E] hover:text-[#4A2478] font-medium transition-colors">
+              Alle anzeigen
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {recentItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl px-5 py-5 flex items-center justify-between transition-colors"
+              >
+                <div className="min-w-0 pr-3">
+                  <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1.5">
+                    {item.category}
+                  </p>
+                  <p className="text-[14px] font-medium text-[#1A1714] leading-snug">{item.title}</p>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-[#C4B9B0] shrink-0 group-hover:text-[#5B2D8E] group-hover:translate-x-0.5 transition-all" strokeWidth={2} />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Kategorien */}
       <section>
         <div className="flex items-baseline justify-between mb-4">
           <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest">
-            Zuletzt angesehen
+            Kategorien
           </p>
           <Link href="/academy" className="text-[12px] text-[#5B2D8E] hover:text-[#4A2478] font-medium transition-colors">
             Alle anzeigen
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {recentItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl px-5 py-5 flex items-center justify-between transition-colors"
-            >
-              <div className="min-w-0 pr-3">
-                <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1.5">
-                  {item.category}
-                </p>
-                <p className="text-[14px] font-medium text-[#1A1714] leading-snug">{item.title}</p>
-              </div>
-              <ArrowRight className="w-3.5 h-3.5 text-[#C4B9B0] shrink-0 group-hover:text-[#5B2D8E] group-hover:translate-x-0.5 transition-all" strokeWidth={2} />
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Kategorien */}
-      <section>
-        <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-4">
-          Kategorien
-        </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {categories.map((cat) => {
             const pct = progressPct(cat)
+            const foundation = isFoundation(cat)
             return (
               <Link
                 key={cat.slug}
@@ -184,13 +195,21 @@ export default function HomePage() {
               >
                 <div className="flex items-start justify-between">
                   <p className="text-[15px] font-semibold text-[#1A1714] leading-snug pr-4 hyphens-auto">{cat.name}</p>
-                  <span className="text-[11px] font-medium text-[#C4B9B0] tabular-nums shrink-0 mt-0.5">{cat.index}</span>
+                  {foundation && (
+                    <span className="text-[11px] font-medium text-[#C4B9B0] tabular-nums shrink-0 mt-0.5">{cat.index}</span>
+                  )}
                 </div>
                 <div className="mt-auto pt-5">
-                  <Progress value={pct} className="h-[2px] bg-[#E3DDD5] mb-2.5" />
-                  <p className="text-[12px] text-[#B8AFA7] tabular-nums">
-                    {pct > 0 ? `${pct}% abgeschlossen` : "Noch nicht begonnen"}
-                  </p>
+                  {foundation ? (
+                    <>
+                      <Progress value={pct} className="h-[2px] bg-[#E3DDD5] mb-2.5" />
+                      <p className="text-[12px] text-[#B8AFA7] tabular-nums">
+                        {pct > 0 ? `${pct}% abgeschlossen` : "Noch nicht begonnen"}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-[12px] text-[#C4B9B0]">Entdecken</p>
+                  )}
                 </div>
               </Link>
             )
