@@ -146,9 +146,11 @@ export function InviteButton({ inviteLink }: Props) {
             </div>
 
             {/* Footer hint */}
-            <p className="text-[11px] text-[#C4B9B0] text-center pb-1">
-              Teile diesen Link mit deinen direkten Partnern.
-            </p>
+            <div className="mt-1 bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl px-4 py-3 text-center">
+              <p className="text-[12px] text-[#6B5E52] leading-relaxed">
+                Bitte teile diesen Link ausschließlich mit deinen direkten Partnern.
+              </p>
+            </div>
 
           </div>
         </div>

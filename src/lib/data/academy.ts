@@ -2,14 +2,25 @@
 
 export type LessonStatus = "done" | "progress" | "open"
 
+export type LessonAttachmentType = "PDF" | "PPTX" | "DOCX"
+
+export type LessonAttachment = {
+  title: string
+  fileType: LessonAttachmentType
+  fileSize?: string
+  // href will be a real Supabase Storage URL when integrated
+  href?: string
+}
+
 export type Lesson = {
   slug: string
   title: string
   description: string
   duration: string
   status: LessonStatus
-  pct?: number      // only relevant when status === "progress"
-  cover: string     // tailwind gradient classes
+  pct?: number           // only relevant when status === "progress"
+  cover: string          // tailwind gradient classes
+  attachments?: LessonAttachment[]   // optional — only renders when present
 }
 
 export type Category = {
@@ -67,6 +78,13 @@ const CATEGORIES: Category[] = [
         duration: "5 Min.",
         status: "done",
         cover: "from-[#A8C094] to-[#7E9E6A]",
+        attachments: [
+          {
+            title: "Produktübersicht Strong OG",
+            fileType: "PDF",
+            fileSize: "2.4 MB",
+          },
+        ],
       },
     ],
   },
@@ -126,8 +144,19 @@ const CATEGORIES: Category[] = [
     lessons: [],
   },
   {
-    slug: "gewerbe-steuern",
+    slug: "social-media",
     index: "07",
+    name: "Social Media",
+    tagline: "Sichtbarkeit & Content",
+    description:
+      "Digitale Sichtbarkeit aufbauen — mit Authentizität, Klarheit und einem ruhigen strategischen Ansatz für moderne Online-Kommunikation.",
+    cover: "from-[#C4A0A8] to-[#A67E88]",
+    plannedLessons: 0,
+    lessons: [],
+  },
+  {
+    slug: "gewerbe-steuern",
+    index: "08",
     name: "Gewerbe & Steuern",
     tagline: "Rechtliches & Finanzen",
     description:

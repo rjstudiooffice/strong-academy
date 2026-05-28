@@ -4,11 +4,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { navItems } from "@/lib/nav"
 import { NavIcon } from "./NavIcon"
+import { Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type Props = { showTeam: boolean }
+type Props = { showTeam: boolean; leadershipUnlocked: boolean }
 
-export function Sidebar({ showTeam }: Props) {
+export function Sidebar({ showTeam, leadershipUnlocked }: Props) {
   const pathname = usePathname()
 
   const allItems = [
@@ -34,7 +35,10 @@ export function Sidebar({ showTeam }: Props) {
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-0.5">
         {allItems.map((item) => {
-          const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+          const isLeadership = item.href === "/leadership"
+          const locked       = isLeadership && !leadershipUnlocked
+          const isActive     = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+
           return (
             <Link
               key={item.href}
@@ -43,14 +47,22 @@ export function Sidebar({ showTeam }: Props) {
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
                 isActive
                   ? "bg-white text-[#5B2D8E] shadow-sm"
-                  : "text-[#6B5E52] hover:bg-[#EDE8DF] hover:text-[#1A1714]"
+                  : locked
+                    ? "text-[#B8AFA7] hover:bg-[#EDE8DF] hover:text-[#9E9188]"
+                    : "text-[#6B5E52] hover:bg-[#EDE8DF] hover:text-[#1A1714]"
               )}
             >
               <NavIcon
                 name={item.icon}
-                className={cn("w-4 h-4 shrink-0", isActive ? "text-[#5B2D8E]" : "text-[#9E9188]")}
+                className={cn(
+                  "w-4 h-4 shrink-0",
+                  isActive ? "text-[#5B2D8E]" : locked ? "text-[#C4B9B0]" : "text-[#9E9188]"
+                )}
               />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {locked && (
+                <Lock className="w-3 h-3 text-[#C4B9B0] shrink-0" strokeWidth={1.75} />
+              )}
             </Link>
           )
         })}

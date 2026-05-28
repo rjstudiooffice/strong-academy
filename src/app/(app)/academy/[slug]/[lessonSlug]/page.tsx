@@ -1,9 +1,36 @@
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Play, CheckCircle2, Circle, Clock } from "lucide-react"
-import { getLessonContext, getAllLessonParams, lessonCount, completedCount, type Lesson } from "@/lib/data/academy"
+import { ArrowLeft, ArrowRight, Play, CheckCircle2, Clock, ArrowUpRight } from "lucide-react"
+import { getLessonContext, getAllLessonParams, lessonCount, completedCount, type Lesson, type LessonAttachment } from "@/lib/data/academy"
 import { notFound } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { MediaCover } from "@/components/features/MediaCover"
+
+// ─── File type badge ─────────────────────────────────────────────────────────
+
+const FILE_COLORS: Record<string, string> = {
+  PDF:  "bg-[#F0EBF8] text-[#5B2D8E]",
+  PPTX: "bg-[#EDF3F0] text-[#3A7A5C]",
+  DOCX: "bg-[#F5EFE8] text-[#8A6040]",
+}
+
+function AttachmentRow({ file }: { file: LessonAttachment }) {
+  return (
+    <div className="flex items-center gap-4 bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl px-4 py-3">
+      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md shrink-0 ${FILE_COLORS[file.fileType] ?? FILE_COLORS.PDF}`}>
+        {file.fileType}
+      </span>
+      <span className="text-[14px] font-medium text-[#1A1714] flex-1 min-w-0 truncate">
+        {file.title}
+      </span>
+      {file.fileSize && (
+        <span className="text-[11px] text-[#B8AFA7] shrink-0 hidden sm:block">{file.fileSize}</span>
+      )}
+      <button className="inline-flex items-center gap-1 text-[12px] font-medium text-[#5B2D8E] hover:text-[#4A2478] transition-colors shrink-0">
+        Ansehen <ArrowUpRight className="w-3 h-3" strokeWidth={2} />
+      </button>
+    </div>
+  )
+}
 
 export function generateStaticParams() {
   return getAllLessonParams()
@@ -115,31 +142,38 @@ export default async function LessonPage({
             </p>
           </div>
 
-          {/* Status / mark done */}
+          {/* Progress status — read-only, set automatically by video player.
+              Integration point: VideoPlayer fires onProgress(pct) and onComplete()
+              → Supabase upsert into lesson_progress table.
+              No manual override: progress reflects actual watch time only. */}
           <div className="pt-1">
-            {lesson.status === "done" ? (
+            {lesson.status === "done" && (
               <div className="inline-flex items-center gap-2 text-[13px] text-[#5B2D8E]/55 bg-[#F0EBF8] px-4 py-2 rounded-xl">
                 <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2} />
                 Lektion abgeschlossen
               </div>
-            ) : lesson.status === "progress" ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-4">
-                  <div className="h-[2px] w-40 rounded-full bg-[#E3DDD5] overflow-hidden">
-                    <div className="h-full rounded-full bg-[#5B2D8E]/40" style={{ width: `${lesson.pct}%` }} />
-                  </div>
-                  <span className="text-[11px] text-[#B8AFA7] tabular-nums">{lesson.pct}%</span>
+            )}
+            {lesson.status === "progress" && (
+              <div className="flex items-center gap-4">
+                <div className="h-[2px] w-40 rounded-full bg-[#E3DDD5] overflow-hidden">
+                  <div className="h-full rounded-full bg-[#5B2D8E]/40" style={{ width: `${lesson.pct}%` }} />
                 </div>
-                <button className="text-[13px] font-medium text-[#5B2D8E] hover:text-[#4A2478] transition-colors">
-                  Als gesehen markieren
-                </button>
+                <span className="text-[11px] text-[#B8AFA7] tabular-nums">{lesson.pct}% gesehen</span>
               </div>
-            ) : (
-              <button className="text-[13px] font-medium text-[#9E9188] hover:text-[#5B2D8E] transition-colors">
-                Als gesehen markieren
-              </button>
             )}
           </div>
+
+          {/* Attachments — only rendered when present */}
+          {lesson.attachments && lesson.attachments.length > 0 && (
+            <div className="pt-2 space-y-3">
+              <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest">
+                Unterlagen
+              </p>
+              {lesson.attachments.map((file) => (
+                <AttachmentRow key={file.title} file={file} />
+              ))}
+            </div>
+          )}
 
           {/* Prev / Next */}
           <div className="flex items-center justify-between pt-6 border-t border-[#E8E2D9]">

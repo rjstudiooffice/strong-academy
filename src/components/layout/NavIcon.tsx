@@ -2,7 +2,8 @@
 
 import {
   Home, GraduationCap, FolderOpen, User, Users,
-  Settings, LogOut, BookOpen, Search, TrendingUp
+  Settings, LogOut, BookOpen, Search, TrendingUp,
+  Compass, Lock,
 } from "lucide-react"
 
 const icons: Record<string, React.ElementType> = {
@@ -11,6 +12,8 @@ const icons: Record<string, React.ElementType> = {
   "folder-open": FolderOpen,
   user: User,
   users: Users,
+  compass: Compass,
+  lock: Lock,
   settings: Settings,
   logout: LogOut,
   book: BookOpen,

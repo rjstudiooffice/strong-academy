@@ -9,7 +9,7 @@ import { InviteButton } from "@/components/features/InviteButton"
 
 // User-specific state — will come from Supabase later
 const recentItems = [
-  { category: "Produktwissen",      title: "Mineralien & Mikronährstoffe",   href: "/academy/produktwissen/mineralien-mikronährstoffe" },
+  { category: "Produktwissen",      title: "Demnächst verfügbar",            href: "/academy/produktwissen" },
   { category: "Produktwissen",      title: "Was ist Strong OG?",             href: "/academy/produktwissen/was-ist-strong-og" },
   { category: "Kommunikation",      title: "Demnächst verfügbar",            href: "/academy/kommunikation" },
 ]
@@ -152,7 +152,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {recentItems.map((item) => (
             <Link
-              key={item.title}
+              key={item.href}
               href={item.href}
               className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl px-5 py-5 flex items-center justify-between transition-colors"
             >
