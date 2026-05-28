@@ -36,7 +36,7 @@ export default function HomePage() {
         {/* Background hero image */}
         <div className="absolute inset-0">
           <Image
-            src="/images/startseite_hero.png"
+            src="/startseite_hero.png"
             alt=""
             fill
             className="object-cover object-right"

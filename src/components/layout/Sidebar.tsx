@@ -24,7 +24,7 @@ export function Sidebar({ showTeam, leadershipUnlocked }: Props) {
       <div className="px-6 pt-8 pb-6">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
-            <Image src="/images/logo.png" alt="Strong Academy" width={32} height={32} className="w-full h-full object-cover" />
+            <Image src="/logo.png" alt="Strong Academy" width={32} height={32} className="w-full h-full object-cover" />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-[#1A1714] leading-none">Strong Academy</p>

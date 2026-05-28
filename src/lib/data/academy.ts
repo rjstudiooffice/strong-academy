@@ -88,8 +88,8 @@ const CATEGORIES: Category[] = [
     description:
       "Strong OG ist eine hochwertige flüssige Vitalstoffversorgung auf Zellebene — mit ausgewählten Mineralien, Mikronährstoffen und optimierter Bioverfügbarkeit für langfristige körperliche Balance.",
     cover: "from-[#9EB88C] to-[#7A9C68]",
-    coverImage: "/images/academy/produktwissen_category_card.png",
-    heroImage: "/images/academy/produktwissen_hero.png",
+    coverImage: "/produktwissen_category_card.png",
+    heroImage: "/produktwissen_hero.png",
     plannedLessons: 1,
     lessons: [
       {
@@ -118,8 +118,8 @@ const CATEGORIES: Category[] = [
     description:
       "Dein Team aufbauen, begleiten und als Führungspersönlichkeit wachsen — von den ersten Strukturen bis zu einer nachhaltigen Teamkultur.",
     cover: "from-[#8FAABB] to-[#6A90A6]",
-    coverImage: "/images/academy/teamaufbau_fuehrung_category_card.png",
-    heroImage: "/images/academy/teamaufbau_fuehrung_hero.png",
+    coverImage: "/teamaufbau_fuehrung_category_card.png",
+    heroImage: "/teamaufbau_fuehrung_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -131,8 +131,8 @@ const CATEGORIES: Category[] = [
     description:
       "Gespräche führen, Menschen begeistern und langfristige Kundenbeziehungen aufbauen — authentisch, ohne Druck, auf Augenhöhe.",
     cover: "from-[#C8A89E] to-[#A88070]",
-    coverImage: "/images/academy/kommunikation_kundenaufbau_category_card.png",
-    heroImage: "/images/academy/kommunikation_kundenaufbau_hero.png",
+    coverImage: "/kommunikation_kundenaufbau_category_card.png",
+    heroImage: "/kommunikation_kundenaufbau_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -144,8 +144,8 @@ const CATEGORIES: Category[] = [
     description:
       "Die wissenschaftlichen Grundlagen einer gesunden Lebensweise — Mikronährstoffe, Zellbiologie und die Zusammenhänge, die du kennen solltest.",
     cover: "from-[#CCAC80] to-[#AA8C5C]",
-    coverImage: "/images/academy/gesundheitsgrundlagen_category_card.png",
-    heroImage: "/images/academy/gesundheitsgrundlagen_hero.png",
+    coverImage: "/gesundheitsgrundlagen_category_card.png",
+    heroImage: "/gesundheitsgrundlagen_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -157,8 +157,8 @@ const CATEGORIES: Category[] = [
     description:
       "Mindset, Motivation und persönliche Exzellenz kultivieren — die innere Grundlage für nachhaltigen äußeren Erfolg.",
     cover: "from-[#BCAACE] to-[#9880B4]",
-    coverImage: "/images/academy/persoenliche_entwicklung_category_card.png",
-    heroImage: "/images/academy/persoenliche_entwicklung_hero.png",
+    coverImage: "/persoenliche_entwicklung_category_card.png",
+    heroImage: "/persoenliche_entwicklung_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -170,8 +170,8 @@ const CATEGORIES: Category[] = [
     description:
       "Die richtigen digitalen Werkzeuge kennen und einsetzen — effizienter arbeiten, besser kommunizieren, smarter skalieren.",
     cover: "from-[#A6B8C6] to-[#7898AE]",
-    coverImage: "/images/academy/digitale_werkzeuge_category_card.png",
-    heroImage: "/images/academy/digitale_werkzeuge_hero.png",
+    coverImage: "/digitale_werkzeuge_category_card.png",
+    heroImage: "/digitale_werkzeuge_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -183,8 +183,8 @@ const CATEGORIES: Category[] = [
     description:
       "Digitale Sichtbarkeit aufbauen — mit Authentizität, Klarheit und einem ruhigen strategischen Ansatz für moderne Online-Kommunikation.",
     cover: "from-[#C4A0A8] to-[#A67E88]",
-    coverImage: "/images/academy/social_media_category_card.png",
-    heroImage: "/images/academy/social_media_hero.png",
+    coverImage: "/social_media_category_card.png",
+    heroImage: "/social_media_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -196,8 +196,8 @@ const CATEGORIES: Category[] = [
     description:
       "Rechtliche und steuerliche Grundlagen für deinen Erfolg als selbstständiger Partner — verständlich erklärt, praxisnah aufbereitet.",
     cover: "from-[#BCAA86] to-[#9A8860]",
-    coverImage: "/images/academy/gewerbe_steuern_category_card.png",
-    heroImage: "/images/academy/gewerbe_steuern_hero.png",
+    coverImage: "/gewerbe_steuern_category_card.png",
+    heroImage: "/gewerbe_steuern_hero.png",
     plannedLessons: 0,
     lessons: [],
   },

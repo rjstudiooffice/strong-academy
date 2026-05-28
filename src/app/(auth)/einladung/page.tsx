@@ -9,7 +9,7 @@ import { ArrowRight } from "lucide-react"
 function BrandMark() {
   return (
     <div className="flex items-center gap-2.5 mb-12">
-      <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><Image src="/images/logo.png" alt="Strong Academy" width={32} height={32} className="w-full h-full object-cover" /></div>
+      <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0"><Image src="/logo.png" alt="Strong Academy" width={32} height={32} className="w-full h-full object-cover" /></div>
       <span className="text-[14px] font-semibold text-[#1A1714]">Strong Academy</span>
     </div>
   )

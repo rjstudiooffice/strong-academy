@@ -36,8 +36,8 @@ const CATEGORIES: LeadershipCategory[] = [
     description:
       "Was Führung wirklich bedeutet — Haltung, Verantwortung und die Kultur, die du in deinem Team erschaffst.",
     cover: "from-[#7A8C6A] to-[#5A6A4A]",
-    coverImage: "/images/leadership/leadership_culture_category_card.png",
-    heroImage: "/images/leadership/leadership_culture_hero.png",
+    coverImage: "/leadership_culture_category_card.png",
+    heroImage: "/leadership_culture_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -49,8 +49,8 @@ const CATEGORIES: LeadershipCategory[] = [
     description:
       "Wie du eine klare Vision entwickelst und daraus eine Strategie baust, die dein Team trägt und bewegt.",
     cover: "from-[#8A7A9A] to-[#6A5A7A]",
-    coverImage: "/images/leadership/vision_strategy_category_card.png",
-    heroImage: "/images/leadership/vision_strategy_hero.png",
+    coverImage: "/vision_strategy_category_card.png",
+    heroImage: "/vision_strategy_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -62,8 +62,8 @@ const CATEGORIES: LeadershipCategory[] = [
     description:
       "Strukturen aufbauen, die ohne dich funktionieren — nachhaltiges Wachstum durch Menschen, nicht nur durch Aktivität.",
     cover: "from-[#9A8070] to-[#7A6050]",
-    coverImage: "/images/leadership/multiplication_category_card.png",
-    heroImage: "/images/leadership/multiplication_hero.png",
+    coverImage: "/multiplication_category_card.png",
+    heroImage: "/multiplication_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
@@ -75,8 +75,8 @@ const CATEGORIES: LeadershipCategory[] = [
     description:
       "Die psychologischen Grundlagen von Teamdynamiken, Motivation und dem, was Menschen wirklich bewegt.",
     cover: "from-[#8A9AA8] to-[#6A7A88]",
-    coverImage: "/images/leadership/leadership_psychology_category_card.png",
-    heroImage: "/images/leadership/leadership_psychology_hero.png",
+    coverImage: "/leadership_psychology_category_card.png",
+    heroImage: "/leadership_psychology_hero.png",
     plannedLessons: 0,
     lessons: [],
   },
