@@ -17,8 +17,8 @@ export function MobileNav({ showTeam }: Props) {
   ]
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F5F0E8]/95 backdrop-blur-md border-t border-[#E8E2D9] px-4 pb-safe">
-      <div className="flex items-center justify-around py-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F5F0E8]/95 backdrop-blur-md border-t border-[#E8E2D9] pb-safe">
+      <div className="flex items-stretch justify-around px-2 pt-1.5 pb-1">
         {allItems.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
           return (
@@ -26,12 +26,13 @@ export function MobileNav({ showTeam }: Props) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all",
+                // min 44px touch target
+                "flex flex-col items-center justify-center gap-1 flex-1 min-h-[44px] py-1 rounded-xl transition-colors",
                 isActive ? "text-[#5B2D8E]" : "text-[#9E9188]"
               )}
             >
-              <NavIcon name={item.icon} className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <NavIcon name={item.icon} className="w-[22px] h-[22px]" />
+              <span className="text-[10px] font-medium leading-none">{item.label}</span>
             </Link>
           )
         })}

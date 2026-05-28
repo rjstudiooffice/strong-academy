@@ -142,7 +142,7 @@ function SearchPageInner() {
       {/* Hero */}
       <section>
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-5">Suche</p>
-        <h1 className="text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
+        <h1 className="text-[1.65rem] sm:text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
           Was möchtest du<br />wissen?
         </h1>
       </section>

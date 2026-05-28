@@ -97,7 +97,7 @@ export default function ProfilPage() {
             </p>
 
             {/* Subtle stat */}
-            <div className="mt-5 flex items-center gap-6">
+            <div className="mt-5 flex items-center gap-4 sm:gap-6 flex-wrap">
               <div>
                 <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1">
                   Gesamtfortschritt

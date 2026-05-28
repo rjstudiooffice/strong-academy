@@ -106,7 +106,7 @@ export default function RessourcenPage() {
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-5">
           Ressourcen
         </p>
-        <h1 className="text-[2.25rem] font-semibold text-[#1A1714] tracking-tight leading-[1.2] max-w-lg">
+        <h1 className="text-[1.85rem] sm:text-[2.25rem] font-semibold text-[#1A1714] tracking-tight leading-[1.2] max-w-lg">
           Unterlagen für dein<br />tägliches Business.
         </h1>
         <p className="mt-5 text-[15px] text-[#8C7E6F] leading-relaxed max-w-md">

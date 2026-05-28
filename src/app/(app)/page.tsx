@@ -34,20 +34,20 @@ export default function HomePage() {
           <InviteButton inviteLink={inviteLink} />
         </div>
 
-        <div className="px-10 py-12 max-w-xl relative z-10">
+        <div className="px-6 py-8 sm:px-10 sm:py-12 max-w-xl relative z-10">
           <p className="text-xs text-[#B8AFA7] font-medium tracking-widest uppercase mb-4">
             <CurrentDate />
           </p>
-          <h1 className="text-[2rem] font-semibold text-[#1A1714] leading-tight tracking-tight">
+          <h1 className="text-[1.7rem] sm:text-[2rem] font-semibold text-[#1A1714] leading-tight tracking-tight">
             Willkommen zurück,{" "}
             <span className="text-[#5B2D8E]">{user.firstName}.</span>
           </h1>
-          <p className="mt-4 text-[#8C7E6F] text-[15px] leading-relaxed max-w-sm">
+          <p className="mt-4 text-[#8C7E6F] text-[14px] sm:text-[15px] leading-relaxed max-w-sm">
             Wissen, das dein Leben verändert. Entdecke Inhalte, die dich und dein Business auf das nächste Level bringen.
           </p>
           <Link
             href="/academy"
-            className="mt-7 inline-flex items-center gap-2.5 bg-[#5B2D8E] text-white text-sm font-medium px-6 py-3 rounded-xl hover:bg-[#4A2478] transition-colors"
+            className="mt-6 sm:mt-7 inline-flex items-center gap-2.5 bg-[#5B2D8E] text-white text-sm font-medium px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl hover:bg-[#4A2478] transition-colors"
           >
             Weiterlernen <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
           </Link>

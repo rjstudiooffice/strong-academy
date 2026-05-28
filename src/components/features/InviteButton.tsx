@@ -70,12 +70,7 @@ export function InviteButton({ inviteLink }: Props) {
           role="dialog"
           aria-modal="true"
           aria-label="Partner einladen"
-          className="
-            fixed inset-0 z-50
-            flex items-start justify-center
-            pt-[10vh] px-5 pb-8
-            sm:pt-[12vh]
-          "
+          className="fixed inset-0 z-50 flex items-end sm:items-start sm:justify-center sm:pt-[12vh] sm:px-5"
         >
           {/* Backdrop */}
           <div
@@ -83,16 +78,21 @@ export function InviteButton({ inviteLink }: Props) {
             onClick={() => setOpen(false)}
           />
 
-          {/* Card */}
+          {/* Card — bottom sheet on mobile, centered modal on sm+ */}
           <div
             className="
-              relative z-10 w-full max-w-[420px]
-              bg-[#FAF9F6] rounded-2xl border border-[#E8E2D9]
-              shadow-[0_8px_48px_rgba(26,23,20,0.13),_0_2px_8px_rgba(26,23,20,0.06)]
-              p-7
+              relative z-10 w-full sm:max-w-[420px]
+              bg-[#FAF9F6]
+              rounded-t-2xl sm:rounded-2xl
+              border border-[#E8E2D9]
+              shadow-[0_-4px_32px_rgba(26,23,20,0.10),_0_0_0_1px_rgba(26,23,20,0.04)]
+              sm:shadow-[0_8px_48px_rgba(26,23,20,0.13),_0_2px_8px_rgba(26,23,20,0.06)]
+              px-6 sm:px-7 pt-7 pb-safe
             "
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Pull handle — mobile only */}
+            <div className="sm:hidden w-10 h-1 bg-[#E8E2D9] rounded-full mx-auto mb-5" />
 
             {/* Close */}
             <button
@@ -141,7 +141,7 @@ export function InviteButton({ inviteLink }: Props) {
             </div>
 
             {/* Footer hint */}
-            <p className="text-[11px] text-[#C4B9B0] text-center">
+            <p className="text-[11px] text-[#C4B9B0] text-center pb-1">
               Teile diesen Link mit deinen direkten Partnern.
             </p>
 

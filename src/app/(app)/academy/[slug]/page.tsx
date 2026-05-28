@@ -69,7 +69,7 @@ export default async function CategoryPage({
           <p className="text-[10px] font-semibold text-[#5B2D8E] uppercase tracking-widest mb-3">
             {category.tagline}
           </p>
-          <h1 className="text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
+          <h1 className="text-[1.65rem] sm:text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
             {category.name}
           </h1>
           <p className="mt-3 text-[15px] text-[#8C7E6F] leading-relaxed max-w-xl">

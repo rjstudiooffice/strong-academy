@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 
@@ -12,6 +12,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Strong Academy",
   description: "Dein persönliches Wissenszentrum für Gesundheit, Leadership und Wachstum.",
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",   // enables env(safe-area-inset-*) on iPhone notch/island
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

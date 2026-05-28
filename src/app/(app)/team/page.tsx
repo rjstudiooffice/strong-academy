@@ -29,7 +29,7 @@ export default function TeamPage() {
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-5">
           Mein Team
         </p>
-        <h1 className="text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
+        <h1 className="text-[1.65rem] sm:text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
           {members.length === 1 ? "1 Partner" : `${members.length} Partner`}
         </h1>
         <p className="mt-3 text-[15px] text-[#8C7E6F] leading-relaxed">

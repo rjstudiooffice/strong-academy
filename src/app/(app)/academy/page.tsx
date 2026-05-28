@@ -15,7 +15,7 @@ export default function AcademyPage() {
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-5">
           Strong Academy
         </p>
-        <h1 className="text-[2.25rem] font-semibold text-[#1A1714] tracking-tight leading-[1.2] max-w-lg">
+        <h1 className="text-[1.85rem] sm:text-[2.25rem] font-semibold text-[#1A1714] tracking-tight leading-[1.2] max-w-lg">
           Wissen, das dein<br />Business verändert.
         </h1>
         <p className="mt-5 text-[15px] text-[#8C7E6F] leading-relaxed">

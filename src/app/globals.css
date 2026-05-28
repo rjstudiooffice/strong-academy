@@ -84,24 +84,48 @@
 @layer base {
   * {
     @apply border-border;
+    /* Remove iOS tap flash on all interactive elements */
+    -webkit-tap-highlight-color: transparent;
   }
+
+  html {
+    @apply font-sans;
+    /* Momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
+    /* Prevent horizontal overflow on mobile */
+    overflow-x: hidden;
   }
-  html {
-    @apply font-sans;
-  }
+
   h1, h2, h3, h4, h5, h6 {
     font-feature-settings: "cv11", "ss01";
     letter-spacing: -0.02em;
+  }
+
+  /* Prevent iOS font zoom on input focus (requires font-size >= 16px) */
+  input, select, textarea {
+    font-size: max(16px, 1em);
   }
 
   /* Subtle page enter animation on every navigation */
   main {
     animation: page-enter 0.22s ease-out both;
   }
+}
+
+/* Safe-area bottom padding helper — used by MobileNav */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Extend bottom padding with safe area */
+.pb-nav-safe {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
 }
 
 @keyframes page-enter {
