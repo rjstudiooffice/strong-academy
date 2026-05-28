@@ -40,6 +40,7 @@ export default function HomePage() {
             alt=""
             fill
             className="object-cover object-right"
+            sizes="(max-width: 768px) 100vw, calc(100vw - 280px)"
             priority
           />
           {/* Left-to-right fade — keeps text readable */}

@@ -37,8 +37,10 @@ export default async function LeadershipCategoryPage({
           imageSrc={category.heroImage}
           darkTint
           index={category.index}
-          objectPosition="center 30%"
-          className="h-52 sm:h-64"
+          objectPosition="center 35%"
+          sizes="(max-width: 768px) 100vw, calc(100vw - 280px)"
+          priority
+          className="h-56 sm:h-80"
         />
         <div className="bg-[#242019] px-8 py-7">
           <p className="text-[10px] font-semibold text-[#9B72CC] uppercase tracking-widest mb-3">

@@ -64,8 +64,10 @@ export default async function CategoryPage({
           gradient={category.cover}
           imageSrc={category.heroImage}
           index={foundation ? category.index : undefined}
-          objectPosition="center 30%"
-          className="h-52 sm:h-64"
+          objectPosition={category.slug === "produktwissen" ? "center center" : "center 35%"}
+          sizes="(max-width: 768px) 100vw, calc(100vw - 280px)"
+          priority
+          className="h-56 sm:h-80"
         />
 
         <div className="bg-[#F5F0E8] px-8 py-7">
