@@ -46,7 +46,8 @@ export default async function AdminKategorienPage() {
       </div>
 
       <div className="bg-white border border-[#E8E2D9] rounded-2xl overflow-hidden">
-        <table className="w-full text-[13px]">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] text-[13px]">
           <thead>
             <tr className="border-b border-[#E8E2D9] bg-[#FAF9F6]">
               <th className="w-10 px-3 py-3" />
@@ -121,6 +122,7 @@ export default async function AdminKategorienPage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

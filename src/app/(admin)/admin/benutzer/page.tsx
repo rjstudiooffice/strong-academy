@@ -39,7 +39,8 @@ export default async function AdminBenutzerPage({
       </form>
 
       <div className="bg-white border border-[#E8E2D9] rounded-2xl overflow-hidden">
-        <table className="w-full text-[13px]">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] text-[13px]">
           <thead>
             <tr className="border-b border-[#E8E2D9] bg-[#FAF9F6]">
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider">Name</th>
@@ -125,6 +126,7 @@ export default async function AdminBenutzerPage({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <p className="text-[12px] text-[#B8AFA7]">{users.length} Benutzer</p>

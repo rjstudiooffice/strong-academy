@@ -26,7 +26,8 @@ export default async function AdminRessourcenPage() {
       </div>
 
       <div className="bg-white border border-[#E8E2D9] rounded-2xl overflow-hidden">
-        <table className="w-full text-[13px]">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px] text-[13px]">
           <thead>
             <tr className="border-b border-[#E8E2D9] bg-[#FAF9F6]">
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider">Titel</th>
@@ -88,6 +89,7 @@ export default async function AdminRessourcenPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )
