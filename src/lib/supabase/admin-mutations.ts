@@ -295,6 +295,24 @@ export async function toggleLeadershipUnlock(formData: FormData): Promise<void> 
   revalidatePath("/admin/benutzer")
 }
 
+export async function changeUserSponsor(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+
+  const id        = formData.get("id") as string
+  const sponsorId = formData.get("sponsor_id") as string | null
+
+  const { error } = await admin
+    .from("profiles")
+    .update({ sponsor_id: sponsorId || null })
+    .eq("id", id)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath("/admin/benutzer")
+  revalidatePath(`/admin/benutzer/${id}`)
+}
+
 export async function changeUserRole(formData: FormData): Promise<void> {
   await requireAdmin()
   const admin = createAdminClient()

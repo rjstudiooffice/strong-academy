@@ -1,8 +1,10 @@
+import Link from "next/link"
 import { getAdminUsers } from "@/lib/supabase/admin-queries"
 import { toggleUserActive, toggleLeadershipUnlock, changeUserRole } from "@/lib/supabase/admin-mutations"
 import { LeadershipToggle } from "@/components/admin/LeadershipToggle"
 import { UserActiveToggle } from "@/components/admin/UserActiveToggle"
 import { RoleToggle } from "@/components/admin/RoleToggle"
+import { Pencil } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -46,7 +48,7 @@ export default async function AdminBenutzerPage({
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider hidden lg:table-cell">Erstellt</th>
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider">Status</th>
               <th className="px-5 py-3 text-right">
-                <span className="text-[11px] font-semibold text-[#9E9188] uppercase tracking-wider">Aktionen</span>
+                <span className="text-[11px] font-semibold text-[#9E9188] uppercase tracking-wider hidden lg:inline">Aktionen</span>
               </th>
             </tr>
           </thead>
@@ -101,14 +103,23 @@ export default async function AdminBenutzerPage({
                   </span>
                 </td>
 
-                {/* Deaktivieren / Reaktivieren */}
+                {/* Aktionen */}
                 <td className="px-5 py-4 text-right">
-                  <UserActiveToggle
-                    action={toggleUserActive}
-                    userId={user.id}
-                    isActive={user.is_active}
-                    userName={user.full_name ?? user.email}
-                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      href={`/admin/benutzer/${user.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E8E2D9] text-[12px] text-[#6B5E52] hover:bg-[#F5F0E8] transition-colors"
+                    >
+                      <Pencil className="w-3 h-3" strokeWidth={2} />
+                      <span className="hidden sm:inline">Bearbeiten</span>
+                    </Link>
+                    <UserActiveToggle
+                      action={toggleUserActive}
+                      userId={user.id}
+                      isActive={user.is_active}
+                      userName={user.full_name ?? user.email}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

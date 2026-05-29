@@ -232,6 +232,22 @@ export async function getAdminResourceById(id: string): Promise<AdminResource | 
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 
+export type AdminUserDetail = AdminUser & {
+  sponsor_id: string | null
+}
+
+export async function getAdminUserById(id: string): Promise<AdminUserDetail | null> {
+  const admin = createAdminClient()
+
+  const { data } = await admin
+    .from("profiles")
+    .select("id, email, full_name, role, is_active, leadership_unlocked, created_at, sponsor_id")
+    .eq("id", id)
+    .single()
+
+  return data as AdminUserDetail | null
+}
+
 export async function getAdminUsers(search?: string): Promise<AdminUser[]> {
   const admin = createAdminClient()
 
