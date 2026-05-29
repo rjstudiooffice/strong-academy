@@ -18,7 +18,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-56 shrink-0 bg-white border-r border-[#E8E2D9] flex flex-col min-h-screen">
+    <aside className="hidden md:flex w-56 shrink-0 bg-white border-r border-[#E8E2D9] flex-col min-h-screen">
       {/* Brand */}
       <div className="px-5 pt-6 pb-5 border-b border-[#E8E2D9]">
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-0.5">

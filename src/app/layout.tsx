@@ -17,7 +17,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",   // enables env(safe-area-inset-*) on iPhone notch/island
+  viewportFit: "cover",
+  // Prevents Safari auto-zoom on input focus (inputs use font-size ≥ 16px)
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
