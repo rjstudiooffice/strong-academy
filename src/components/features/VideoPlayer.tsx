@@ -1,32 +1,20 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition, useId } from "react"
+import { useEffect, useRef, useState, useId } from "react"
 import { CheckCircle2, Clock } from "lucide-react"
 import { saveProgress } from "@/lib/supabase/actions"
 
-// ─── Vimeo URL helpers ────────────────────────────────────────────────────────
+// ─── PlayerJS loader (Bunny's player API) ─────────────────────────────────────
 
-function parseVimeo(url: string): { id: string; hash?: string } | null {
-  // https://vimeo.com/123456789
-  // https://vimeo.com/123456789/abcdef
-  // https://player.vimeo.com/video/123456789
-  // https://player.vimeo.com/video/123456789?h=abcdef
-  const fromPlayer = url.match(/player\.vimeo\.com\/video\/(\d+)(?:\?.*h=([a-zA-Z0-9]+))?/)
-  if (fromPlayer) return { id: fromPlayer[1], hash: fromPlayer[2] }
-  const fromVimeo = url.match(/vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/)
-  if (fromVimeo) return { id: fromVimeo[1], hash: fromVimeo[2] }
-  return null
-}
-
-function buildVimeoEmbed(id: string, playerId: string, hash?: string): string {
-  const params = new URLSearchParams({
-    api:       "1",
-    player_id: playerId,
-    autopause: "0",
-    color:     "5B2D8E",
+function loadPlayerJS(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).Playerjs) { resolve(); return }
+    const script    = document.createElement("script")
+    script.src      = "https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js"
+    script.onload   = () => resolve()
+    script.onerror  = () => reject(new Error("PlayerJS load failed"))
+    document.head.appendChild(script)
   })
-  if (hash) params.set("h", hash)
-  return `https://player.vimeo.com/video/${id}?${params}`
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -62,97 +50,70 @@ export function VideoPlayer({
   initialProgress,
   initialCompleted,
 }: Props) {
-  const uid             = useId().replace(/:/g, "")
-  const playerId        = `vimeo-${uid}`
-  const iframeRef       = useRef<HTMLIFrameElement>(null)
-  const [progress,   setProgress]   = useState(initialProgress)
-  const [completed,  setCompleted]  = useState(initialCompleted)
-  const [savedPct,   setSavedPct]   = useState(initialProgress)
-  const [isPending,  startTransition] = useTransition()
+  const uid        = useId().replace(/:/g, "")
+  const iframeId   = `bunny-player-${uid}`
+  const iframeRef  = useRef<HTMLIFrameElement>(null)
 
-  const vimeo = videoUrl ? parseVimeo(videoUrl) : null
-  const embedUrl = vimeo ? buildVimeoEmbed(vimeo.id, playerId, vimeo.hash) : null
+  const [progress,  setProgress]  = useState(initialProgress)
+  const [completed, setCompleted] = useState(initialCompleted)
+  const [savedPct,  setSavedPct]  = useState(initialProgress)
 
-  // ── Manual progress ────────────────────────────────────────────────────────
-  function handleProgress(pct: number) {
-    if (!lessonId || pct <= savedPct) return
-    startTransition(async () => {
-      await saveProgress(lessonId, pct)
-      setProgress(pct)
-      setCompleted(pct >= 100)
-      setSavedPct(pct)
-    })
-  }
+  const isBunny = !!videoUrl && videoUrl.includes("iframe.mediadelivery.net")
 
-  // ── Vimeo postMessage tracking ─────────────────────────────────────────────
-  useEffect(() => {
-    if (!embedUrl || !iframeRef.current) return
-
-    function handleMessage(event: MessageEvent) {
-      if (!event.origin.includes("vimeo.com")) return
-      try {
-        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data
-
-        if (data.event === "ready") {
-          // Subscribe to playProgress and finish events
-          iframeRef.current?.contentWindow?.postMessage(
-            JSON.stringify({ method: "addEventListener", value: "playProgress" }),
-            "https://player.vimeo.com"
-          )
-          iframeRef.current?.contentWindow?.postMessage(
-            JSON.stringify({ method: "addEventListener", value: "finish" }),
-            "https://player.vimeo.com"
-          )
-        }
-
-        if (data.player_id !== playerId) return
-
-        if (data.event === "playProgress") {
-          const pct = Math.round((data.data?.percent ?? 0) * 100)
-          setProgress(pct)
-          // Save at each new milestone
-          const milestone = MILESTONES.findLast((m) => pct >= m)
-          if (milestone && milestone > savedPct) handleProgress(milestone)
-        }
-
-        if (data.event === "finish") {
-          handleProgress(100)
-        }
-      } catch {}
-    }
-
-    window.addEventListener("message", handleMessage)
-    return () => window.removeEventListener("message", handleMessage)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [embedUrl, playerId, savedPct])
-
-  // ── Duration display ───────────────────────────────────────────────────────
   const durationLabel = durationSeconds
     ? `${Math.round(durationSeconds / 60)} Min.`
     : null
 
+  // ── Save progress (auto only, no manual trigger) ───────────────────────────
+  async function handleProgress(pct: number) {
+    if (!lessonId || pct <= savedPct) return
+    await saveProgress(lessonId, pct)
+    setProgress(pct)
+    setCompleted(pct >= 100)
+    setSavedPct(pct)
+  }
+
+  // ── Bunny Stream: PlayerJS event tracking ──────────────────────────────────
+  useEffect(() => {
+    if (!isBunny || !iframeRef.current) return
+
+    let destroyed = false
+
+    loadPlayerJS().then(() => {
+      if (destroyed || !iframeRef.current) return
+      const Playerjs = (window as any).Playerjs
+      if (!Playerjs) return
+
+      const player = new Playerjs({ id: iframeId })
+
+      player.on("timeupdate", (data: { currentTime: number; duration: number }) => {
+        if (!data.duration) return
+        const pct      = Math.round((data.currentTime / data.duration) * 100)
+        setProgress(pct)
+        const milestone = [...MILESTONES].reverse().find((m) => pct >= m)
+        if (milestone) handleProgress(milestone)
+      })
+
+      player.on("ended", () => handleProgress(100))
+    }).catch(() => {
+      // PlayerJS failed to load — no tracking, video still plays
+    })
+
+    return () => { destroyed = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBunny, iframeId])
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4">
+
       {/* Video area */}
       <div className="rounded-2xl shadow-[0_4px_40px_rgba(26,23,20,0.10),_0_1px_6px_rgba(26,23,20,0.06)] overflow-hidden">
-        {embedUrl ? (
-          // Vimeo embed
+        {videoUrl ? (
           <div className="aspect-video w-full bg-black">
             <iframe
               ref={iframeRef}
-              id={playerId}
-              src={embedUrl}
-              className="w-full h-full"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
-              title={title}
-            />
-          </div>
-        ) : videoUrl ? (
-          // Other video provider (Bunny, direct URL, etc.)
-          <div className="aspect-video w-full bg-black">
-            <iframe
+              id={iframeId}
               src={videoUrl}
               className="w-full h-full"
               allow="autoplay; fullscreen; picture-in-picture"
@@ -163,13 +124,12 @@ export function VideoPlayer({
         ) : (
           // No video — placeholder
           <div
-            className={`aspect-video w-full rounded-2xl bg-gradient-to-br ${coverGradient ?? "from-[#B0A898] to-[#8C8070]"} relative`}
+            className={`aspect-video w-full bg-gradient-to-br ${coverGradient ?? "from-[#B0A898] to-[#8C8070]"} relative`}
           >
             {thumbnailUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
             )}
-            {/* Overlay header */}
             <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-4">
               <span className="text-[11px] font-semibold text-white/65 uppercase tracking-widest">
                 {String(lessonIndex + 1).padStart(2, "0")} / {String(totalLessons).padStart(2, "0")}
@@ -181,13 +141,11 @@ export function VideoPlayer({
                 </span>
               )}
             </div>
-            {/* "Video folgt" center */}
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="w-16 h-16 rounded-full bg-white/75 backdrop-blur-md ring-1 ring-white/25 flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.18)]">
                 <span className="text-[#5B2D8E] text-xs font-medium">Video folgt</span>
               </span>
             </div>
-            {/* Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 pb-5 pt-10 bg-gradient-to-t from-black/32 via-black/10 to-transparent">
               {categoryTagline && (
                 <p className="text-[10px] font-semibold text-white/55 uppercase tracking-widest mb-1.5">
@@ -200,7 +158,7 @@ export function VideoPlayer({
         )}
       </div>
 
-      {/* Progress controls */}
+      {/* Progress — read-only, driven by video playback only */}
       {lessonId && (
         <div className="pt-1">
           {completed ? (
@@ -208,46 +166,17 @@ export function VideoPlayer({
               <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2} />
               Lektion abgeschlossen
             </div>
-          ) : (
-            <div className="space-y-3">
-              {/* Progress bar (only visible for Vimeo auto-tracking or if there's progress) */}
-              {progress > 0 && (
-                <div className="flex items-center gap-4">
-                  <div className="h-[2px] w-40 rounded-full bg-[#E3DDD5] overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-[#5B2D8E]/40 transition-all duration-500"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <span className="text-[11px] text-[#B8AFA7] tabular-nums">{progress}% gesehen</span>
-                </div>
-              )}
-
-              {/* Manual controls — shown when no Vimeo (no auto tracking) */}
-              {!vimeo && (
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  {([25, 50, 75] as const).map((pct) => (
-                    <button
-                      key={pct}
-                      disabled={isPending || progress >= pct}
-                      onClick={() => handleProgress(pct)}
-                      className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-[#F5F0E8] border border-[#E8E2D9] text-[#6B5E52] hover:bg-[#EDE8DF] transition-colors disabled:opacity-35 disabled:cursor-default"
-                    >
-                      {pct}%
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <button
-                disabled={isPending}
-                onClick={() => handleProgress(100)}
-                className="text-[12px] font-medium px-4 py-1.5 rounded-lg bg-[#5B2D8E] text-white hover:bg-[#4A2478] transition-colors disabled:opacity-60"
-              >
-                {isPending ? "Wird gespeichert …" : "Als abgeschlossen markieren"}
-              </button>
+          ) : progress > 0 ? (
+            <div className="flex items-center gap-4">
+              <div className="h-[2px] w-40 rounded-full bg-[#E3DDD5] overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-[#5B2D8E]/40 transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span className="text-[11px] text-[#B8AFA7] tabular-nums">{progress}% gesehen</span>
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>

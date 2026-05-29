@@ -84,7 +84,7 @@ export default async function LektionBearbeitenPage({
               name="video_url"
               type="text"
               defaultValue={lesson.video_url ?? ""}
-              placeholder="https://vimeo.com/123456789"
+              placeholder="https://iframe.mediadelivery.net/embed/LIBRARY_ID/VIDEO_ID"
               className={INPUT}
             />
           </div>

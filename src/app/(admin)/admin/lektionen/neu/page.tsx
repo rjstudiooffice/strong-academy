@@ -64,11 +64,11 @@ export default async function NeueLektion() {
             <input
               name="video_url"
               type="text"
-              placeholder="https://vimeo.com/123456789 oder https://iframe.mediadelivery.net/…"
+              placeholder="https://iframe.mediadelivery.net/embed/LIBRARY_ID/VIDEO_ID"
               className={INPUT}
             />
             <p className="mt-1.5 text-[11px] text-[#B8AFA7]">
-              Vimeo-URL, Bunny Stream Embed-URL oder externe Video-URL hinterlegen.
+              Bunny Stream Embed-URL hinterlegen — Fortschritt wird automatisch getrackt.
             </p>
           </div>
         </div>
