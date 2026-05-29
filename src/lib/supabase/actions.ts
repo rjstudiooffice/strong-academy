@@ -25,7 +25,6 @@ export async function register(prevState: AuthState, formData: FormData): Promis
 
   const supabase = await createClient()
 
-  // ── Step 1: signUp ──────────────────────────────────────────────────────────
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
@@ -34,38 +33,14 @@ export async function register(prevState: AuthState, formData: FormData): Promis
     },
   })
 
-  if (signUpError) {
-    console.error("[register/signUp]", {
-      message: signUpError.message,
-      status:  signUpError.status,
-      name:    signUpError.name,
-      code:    (signUpError as { code?: string }).code ?? "–",
-    })
-    return {
-      error: `[signUp] ${signUpError.message} · status ${signUpError.status ?? "–"}`,
-    }
+  if (signUpError) return { error: signUpError.message }
+
+  // Session is present when "Confirm email" is OFF — no second signIn needed
+  if (!signUpData.session) {
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) return { error: "Konto erstellt. Bitte bestätige deine E-Mail und melde dich dann an." }
   }
 
-  console.log("[register/signUp] ok — user id:", signUpData.user?.id ?? "none", "· session:", signUpData.session ? "present" : "null")
-
-  // ── Step 2: signIn ──────────────────────────────────────────────────────────
-  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-
-  if (signInError) {
-    console.error("[register/signIn]", {
-      message: signInError.message,
-      status:  signInError.status,
-      name:    signInError.name,
-      code:    (signInError as { code?: string }).code ?? "–",
-    })
-    return {
-      error: `[signIn] ${signInError.message} · status ${signInError.status ?? "–"}`,
-    }
-  }
-
-  console.log("[register/signIn] ok — session expires:", signInData.session?.expires_at ?? "–")
-
-  // ── Step 3: redirect ────────────────────────────────────────────────────────
   redirect("/")
 }
 
