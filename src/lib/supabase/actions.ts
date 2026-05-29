@@ -24,7 +24,9 @@ export async function register(prevState: AuthState, formData: FormData): Promis
   const password  = formData.get("password") as string
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signUp({
+
+  // ── Step 1: signUp ──────────────────────────────────────────────────────────
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -32,13 +34,38 @@ export async function register(prevState: AuthState, formData: FormData): Promis
     },
   })
 
-  if (error) return { error: error.message }
+  if (signUpError) {
+    console.error("[register/signUp]", {
+      message: signUpError.message,
+      status:  signUpError.status,
+      name:    signUpError.name,
+      code:    (signUpError as { code?: string }).code ?? "–",
+    })
+    return {
+      error: `[signUp] ${signUpError.message} · status ${signUpError.status ?? "–"}`,
+    }
+  }
 
-  // Auto-login after sign-up. Requires "Confirm email" to be OFF in Supabase Dashboard.
-  // If it's ON, signInWithPassword returns "Email not confirmed" → show helpful message.
-  const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
-  if (loginError) return { error: "Konto erstellt. Bitte bestätige deine E-Mail, dann kannst du dich anmelden." }
+  console.log("[register/signUp] ok — user id:", signUpData.user?.id ?? "none", "· session:", signUpData.session ? "present" : "null")
 
+  // ── Step 2: signIn ──────────────────────────────────────────────────────────
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+
+  if (signInError) {
+    console.error("[register/signIn]", {
+      message: signInError.message,
+      status:  signInError.status,
+      name:    signInError.name,
+      code:    (signInError as { code?: string }).code ?? "–",
+    })
+    return {
+      error: `[signIn] ${signInError.message} · status ${signInError.status ?? "–"}`,
+    }
+  }
+
+  console.log("[register/signIn] ok — session expires:", signInData.session?.expires_at ?? "–")
+
+  // ── Step 3: redirect ────────────────────────────────────────────────────────
   redirect("/")
 }
 
