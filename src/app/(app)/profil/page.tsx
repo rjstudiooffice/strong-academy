@@ -4,7 +4,7 @@ import {
   getOverallProgress,
   progressPct,
 } from "@/lib/data/academy"
-import { getCurrentUser, userFullName, userInitials } from "@/lib/data/user"
+import { getProfile, profileInitials } from "@/lib/supabase/profile"
 import { LogoutButton } from "@/components/features/LogoutButton"
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -71,10 +71,15 @@ function SettingsRow({
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-export default function ProfilPage() {
-  const user       = getCurrentUser()
-  const name       = userFullName(user)
-  const initials   = userInitials(user)
+export default async function ProfilPage() {
+  const profile = await getProfile()
+
+  const name       = profile?.full_name ?? "–"
+  const initials   = profile ? profileInitials(profile) : "?"
+  const email      = profile?.email ?? "–"
+  const memberSince = profile
+    ? new Date(profile.created_at).toLocaleDateString("de-DE", { month: "long", year: "numeric" })
+    : "–"
 
   const { pct: overallPct, done: doneLessons, total: totalLessons } = getOverallProgress()
   const foundation       = getFoundationCategories()
@@ -95,7 +100,7 @@ export default function ProfilPage() {
               {name}
             </h1>
             <p className="mt-1 text-[13px] text-[#9E9188]">
-              Mitglied seit {user.memberSince}
+              Mitglied seit {memberSince}
             </p>
 
             <div className="mt-5 flex items-center gap-4 sm:gap-6 flex-wrap">
@@ -142,8 +147,8 @@ export default function ProfilPage() {
           Persönliche Informationen
         </p>
         <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-6">
-          <InfoRow label="Name"   value={name}       action={{ label: "Bearbeiten" }} />
-          <InfoRow label="E-Mail" value={user.email} action={{ label: "Ändern" }} />
+          <InfoRow label="Name"   value={name}  action={{ label: "Bearbeiten" }} />
+          <InfoRow label="E-Mail" value={email} action={{ label: "Ändern" }} />
         </div>
       </section>
 
@@ -183,8 +188,7 @@ export default function ProfilPage() {
           Einstellungen
         </p>
         <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-6">
-          <SettingsRow label="Sprache"  value={user.language} cta="Ändern" />
-          <SettingsRow label="Passwort" value="••••••••"       cta="Ändern" />
+          <SettingsRow label="Passwort" value="••••••••" cta="Ändern" />
           <LogoutButton />
         </div>
       </section>

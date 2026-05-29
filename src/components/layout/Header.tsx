@@ -3,13 +3,14 @@
 import { Search } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
-import { getCurrentUser, userFullName, userInitials } from "@/lib/data/user"
+import type { Profile } from "@/lib/supabase/profile"
+import { profileInitials } from "@/lib/supabase/profile"
 
-const user = getCurrentUser()
+type Props = { profile: Profile | null }
 
-export function Header() {
-  const name     = userFullName(user)
-  const initials = userInitials(user)
+export function Header({ profile }: Props) {
+  const initials = profile ? profileInitials(profile) : "?"
+  const name     = profile?.full_name ?? ""
 
   return (
     <header className="sticky top-0 z-30 bg-[#FAF9F6]/90 backdrop-blur-sm border-b border-[#E8E2D9] px-6 py-3">
@@ -34,7 +35,7 @@ export function Header() {
         {/* User — links to profile */}
         <Link href="/profil" className="flex items-center gap-2.5 ml-auto group">
           <Avatar className="w-8 h-8">
-            <AvatarImage src={user.avatarUrl ?? ""} alt={name} />
+            <AvatarImage src={profile?.avatar_url ?? ""} alt={name} />
             <AvatarFallback className="bg-[#5B2D8E] text-white text-xs font-medium">
               {initials}
             </AvatarFallback>

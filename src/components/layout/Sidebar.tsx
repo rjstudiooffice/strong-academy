@@ -7,6 +7,7 @@ import { navItems } from "@/lib/nav"
 import { NavIcon } from "./NavIcon"
 import { Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { logout } from "@/lib/supabase/actions"
 
 type Props = { showTeam: boolean; leadershipUnlocked: boolean }
 
@@ -71,10 +72,12 @@ export function Sidebar({ showTeam, leadershipUnlocked }: Props) {
 
       {/* Bottom */}
       <div className="px-3 pb-6 border-t border-[#E8E2D9] pt-3 mt-3">
-        <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#6B5E52] hover:bg-[#EDE8DF] hover:text-[#1A1714] transition-all duration-150">
-          <NavIcon name="logout" className="w-4 h-4 shrink-0 text-[#9E9188]" />
-          Abmelden
-        </button>
+        <form action={logout}>
+          <button type="submit" className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#6B5E52] hover:bg-[#EDE8DF] hover:text-[#1A1714] transition-all duration-150">
+            <NavIcon name="logout" className="w-4 h-4 shrink-0 text-[#9E9188]" />
+            Abmelden
+          </button>
+        </form>
       </div>
     </aside>
   )

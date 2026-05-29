@@ -9,7 +9,6 @@ import {
   memberAvatarColor,
   type TeamMember,
 } from "@/lib/data/team"
-import { getCurrentUser, isAdmin } from "@/lib/data/user"
 
 // ─── Member card ─────────────────────────────────────────────────────────────
 
@@ -152,7 +151,6 @@ function AdminSection() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TeamPage() {
-  const user    = getCurrentUser()
   const members = getTeamMembers()
   const [query,      setQuery]      = useState("")
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set())
@@ -223,8 +221,7 @@ export default function TeamPage() {
         )}
       </section>
 
-      {/* Admin-only section */}
-      {isAdmin(user) && <AdminSection />}
+      {/* Admin-only section — TODO: wire to real role check */}
 
     </div>
   )

@@ -3,14 +3,15 @@ import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
 import Link from "next/link"
 import { getCategories, getFoundationCategories, progressPct, getOverallProgress, getNextLesson, isFoundation } from "@/lib/data/academy"
-import { getCurrentUser } from "@/lib/data/user"
 import { getInviteLink } from "@/lib/data/team"
 import { CurrentDate } from "@/components/features/CurrentDate"
 import { InviteButton } from "@/components/features/InviteButton"
+import { getProfile, profileFirstName } from "@/lib/supabase/profile"
 
-export default function HomePage() {
-  const user          = getCurrentUser()
-  const inviteLink    = getInviteLink(user.id)
+export default async function HomePage() {
+  const profile       = await getProfile()
+  const firstName     = profile ? profileFirstName(profile) : ""
+  const inviteLink    = getInviteLink(profile?.id ?? "")
   const categories    = getCategories()
   const overall       = getOverallProgress()
   const nextLesson    = getNextLesson()
@@ -58,7 +59,7 @@ export default function HomePage() {
           </p>
           <h1 className="text-[1.7rem] sm:text-[2rem] font-semibold text-[#1A1714] leading-tight tracking-tight">
             Willkommen zurück,{" "}
-            <span className="text-[#5B2D8E]">{user.firstName}.</span>
+            <span className="text-[#5B2D8E]">{firstName}.</span>
           </h1>
           <p className="mt-4 text-[#8C7E6F] text-[14px] sm:text-[15px] leading-relaxed max-w-sm">
             Wissen, das dein Leben verändert. Entdecke Inhalte, die dich und dein Business auf das nächste Level bringen.
