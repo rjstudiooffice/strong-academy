@@ -49,6 +49,19 @@ export default function NeueKategoriePage() {
           <textarea name="description" rows={3} placeholder="Kurze Beschreibung der Kategorie…" className={INPUT} />
         </div>
 
+        <div>
+          <label className={LABEL}>Video-Präfix (Bunny Stream)</label>
+          <input
+            name="video_prefix"
+            type="text"
+            placeholder="academy_produktwissen_"
+            className={INPUT}
+          />
+          <p className="mt-1.5 text-[11px] text-[#B8AFA7]">
+            Schema: bereich_kategorie_ — wird für automatische Bunny-Filterung verwendet.
+          </p>
+        </div>
+
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className={LABEL}>Index-Label</label>

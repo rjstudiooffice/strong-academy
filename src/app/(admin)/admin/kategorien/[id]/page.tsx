@@ -61,6 +61,20 @@ export default async function KategorieBearbeitenPage({
           <textarea name="description" rows={3} defaultValue={cat.description ?? ""} className={INPUT} />
         </div>
 
+        <div>
+          <label className={LABEL}>Video-Präfix (Bunny Stream)</label>
+          <input
+            name="video_prefix"
+            type="text"
+            defaultValue={cat.video_prefix ?? ""}
+            placeholder="academy_produktwissen_"
+            className={INPUT}
+          />
+          <p className="mt-1.5 text-[11px] text-[#B8AFA7]">
+            Wird verwendet um Bunny-Videos automatisch zu filtern. Schema: {cat.area_slug ?? "bereich"}_kategorie_
+          </p>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={LABEL}>Reihenfolge</label>

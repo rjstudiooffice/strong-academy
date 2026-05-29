@@ -10,6 +10,8 @@ export type AdminCategory = {
   slug: string
   name: string
   type: "foundation" | "library" | "leadership"
+  area_slug: string | null      // 'academy' | 'leadership' | 'library'
+  video_prefix: string | null   // e.g. 'academy_produktwissen_' — used for Bunny filtering
   tagline: string | null
   description: string | null
   index_label: string | null
@@ -104,7 +106,7 @@ export async function getAdminCategories(): Promise<AdminCategory[]> {
 
   const { data: cats } = await admin
     .from("categories")
-    .select("id, slug, name, type, tagline, description, index_label, cover_gradient, cover_image_url, hero_image_url, sort_order, is_active, created_at")
+    .select("id, slug, name, type, area_slug, video_prefix, tagline, description, index_label, cover_gradient, cover_image_url, hero_image_url, sort_order, is_active, created_at")
     .order("type")
     .order("sort_order")
 
@@ -133,7 +135,7 @@ export async function getAdminCategoryById(id: string): Promise<AdminCategory | 
 
   const { data } = await admin
     .from("categories")
-    .select("id, slug, name, type, tagline, description, index_label, cover_gradient, cover_image_url, hero_image_url, sort_order, is_active, created_at")
+    .select("id, slug, name, type, area_slug, video_prefix, tagline, description, index_label, cover_gradient, cover_image_url, hero_image_url, sort_order, is_active, created_at")
     .eq("id", id)
     .single()
 

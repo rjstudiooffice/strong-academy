@@ -5,6 +5,7 @@ import { getAdminLessonById, getAdminLessonFiles, getAdminCategories } from "@/l
 import { updateLesson, createLessonFile, deleteLessonFile } from "@/lib/supabase/admin-mutations"
 import { DeleteButton } from "@/components/admin/DeleteButton"
 import { ImageUpload } from "@/components/admin/ImageUpload"
+import { AreaCategorySelect } from "@/components/admin/AreaCategorySelect"
 import { formatDuration } from "@/lib/supabase/content"
 
 export const dynamic = "force-dynamic"
@@ -12,26 +13,29 @@ export const dynamic = "force-dynamic"
 const INPUT = "w-full px-3 py-2.5 text-[13px] bg-[#FAF9F6] border border-[#E8E2D9] rounded-xl text-[#1A1714] placeholder:text-[#C4B9B0] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]/15 focus:border-[#5B2D8E]/30 transition-all"
 const LABEL = "block text-[12px] font-semibold text-[#6B5E52] mb-1.5"
 
-const TYPE_LABEL: Record<string, string> = {
-  foundation: "Foundation",
-  library:    "Bibliothek",
-  leadership: "Leadership",
-}
-
 export default async function LektionBearbeitenPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [lesson, files, categories] = await Promise.all([
+  const [lesson, files, allCategories] = await Promise.all([
     getAdminLessonById(id),
     getAdminLessonFiles(id),
     getAdminCategories(),
   ])
   if (!lesson) notFound()
 
-  const action = updateLesson.bind(null, id)
+  const trackableCategories = allCategories
+    .filter((c) => c.area_slug === "academy" || c.area_slug === "leadership")
+    .map((c) => ({
+      id:           c.id,
+      name:         c.name,
+      area_slug:    c.area_slug,
+      video_prefix: c.video_prefix,
+    }))
+
+  const action  = updateLesson.bind(null, id)
   const addFile = createLessonFile.bind(null, id)
 
   return (
@@ -49,17 +53,13 @@ export default async function LektionBearbeitenPage({
 
       <form action={action} className="bg-white border border-[#E8E2D9] rounded-2xl p-6 space-y-5">
 
-        <div>
-          <label className={LABEL}>Kategorie *</label>
-          <select name="category_id" required defaultValue={lesson.category_id} className={INPUT}>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {TYPE_LABEL[cat.type]} › {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Bereich → Kategorie */}
+        <AreaCategorySelect
+          categories={trackableCategories}
+          defaultCategoryId={lesson.category_id}
+        />
 
+        <div className="border-t border-[#E8E2D9] pt-5">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={LABEL}>Titel *</label>
@@ -69,6 +69,7 @@ export default async function LektionBearbeitenPage({
             <label className={LABEL}>Slug *</label>
             <input name="slug" type="text" required defaultValue={lesson.slug} className={INPUT} />
           </div>
+        </div>
         </div>
 
         <div>

@@ -32,10 +32,13 @@ export async function createCategory(formData: FormData): Promise<void> {
   await requireAdmin()
   const admin = createAdminClient()
 
+  const type = formData.get("type") as string
   const payload = {
     name:            formData.get("name") as string,
     slug:            formData.get("slug") as string,
-    type:            formData.get("type") as string,
+    type,
+    area_slug:       type === "foundation" ? "academy" : type === "leadership" ? "leadership" : "library",
+    video_prefix:    formData.get("video_prefix") as string || null,
     tagline:         formData.get("tagline") as string || null,
     description:     formData.get("description") as string || null,
     index_label:     formData.get("index_label") as string || null,
@@ -62,6 +65,7 @@ export async function updateCategory(id: string, formData: FormData): Promise<vo
   const payload = {
     name:            formData.get("name") as string,
     slug:            formData.get("slug") as string,
+    video_prefix:    formData.get("video_prefix") as string || null,
     tagline:         formData.get("tagline") as string || null,
     description:     formData.get("description") as string || null,
     index_label:     formData.get("index_label") as string || null,
