@@ -167,6 +167,16 @@ const CATEGORIES: Category[] = [
     heroImage: "/gewerbe_steuern_hero.png",
     lessons: [],
   },
+  {
+    slug: "karriereplan",
+    index: "09",
+    name: "Karriereplan",
+    tagline: "Karriere & Aufstieg",
+    description:
+      "Der Zinzino-Karriereplan — von den ersten Schritten bis zur Diamond-Ebene. Verstehe die Stufen, Voraussetzungen und Möglichkeiten deiner persönlichen Karriereentwicklung.",
+    cover: "from-[#8ABBB0] to-[#68998E]",
+    lessons: [],
+  },
 ]
 
 // ─── Queries ─────────────────────────────────────────────────────────────────

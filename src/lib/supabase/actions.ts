@@ -40,7 +40,8 @@ export async function register(prevState: AuthState, formData: FormData): Promis
     email,
     password,
     options: {
-      data: { full_name: `${firstName} ${lastName}`.trim() },
+      // sponsor_id is read by the DB trigger — sets it atomically with profile creation
+      data: { full_name: `${firstName} ${lastName}`.trim(), sponsor_id: invitation.sponsorId },
     },
   })
 
@@ -116,6 +117,23 @@ export async function removePartner(partnerId: string): Promise<{ error?: string
     .update({ sponsor_id: null })
     .eq("id", partnerId)
     .eq("sponsor_id", user.id)
+
+  if (error) return { error: error.message }
+  return {}
+}
+
+export async function updateProfile(data: {
+  fullName: string
+  avatarUrl: string | null
+}): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name: data.fullName, avatar_url: data.avatarUrl })
+    .eq("id", user.id)
 
   if (error) return { error: error.message }
   return {}

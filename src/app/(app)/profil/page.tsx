@@ -1,70 +1,8 @@
-import { ChevronRight, LogOut } from "lucide-react"
 import { getFoundationCategories } from "@/lib/data/academy"
 import { getProfile, profileInitials } from "@/lib/supabase/profile"
 import { getOverallProgress, getFoundationCategoryProgress } from "@/lib/supabase/progress"
 import { LogoutButton } from "@/components/features/LogoutButton"
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
-function InfoRow({
-  label,
-  value,
-  action,
-}: {
-  label: string
-  value: string
-  action?: { label: string }
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 py-4 border-b border-[#EDE8DF] last:border-0">
-      <div className="flex items-baseline gap-5 sm:gap-8 min-w-0 flex-1">
-        <span className="text-[11px] sm:text-[12px] font-medium text-[#B8AFA7] uppercase tracking-widest w-16 sm:w-24 shrink-0">
-          {label}
-        </span>
-        <span className="text-[14px] text-[#1A1714] truncate min-w-0">{value}</span>
-      </div>
-      {action && (
-        <button className="text-[12px] text-[#5B2D8E] hover:text-[#4A2478] font-medium transition-colors shrink-0 ml-1">
-          {action.label}
-        </button>
-      )}
-    </div>
-  )
-}
-
-function SettingsRow({
-  label,
-  value,
-  cta,
-  danger,
-}: {
-  label: string
-  value?: string
-  cta: string
-  danger?: boolean
-}) {
-  return (
-    <button className="w-full flex items-center justify-between gap-3 py-4 border-b border-[#EDE8DF] last:border-0 group text-left">
-      <div className="flex items-baseline gap-5 sm:gap-8 min-w-0 flex-1">
-        <span className="text-[11px] sm:text-[12px] font-medium text-[#B8AFA7] uppercase tracking-widest w-16 sm:w-24 shrink-0">
-          {label}
-        </span>
-        {value && (
-          <span className="text-[14px] text-[#6B5E52] truncate min-w-0">{value}</span>
-        )}
-      </div>
-      <span className={`flex items-center gap-1 text-[12px] font-medium transition-colors ${
-        danger
-          ? "text-[#A06050] group-hover:text-[#8A4A3C]"
-          : "text-[#5B2D8E] group-hover:text-[#4A2478]"
-      }`}>
-        {cta}
-        {!danger && <ChevronRight className="w-3 h-3" strokeWidth={2.5} />}
-        {danger && <LogOut className="w-3 h-3" strokeWidth={2} />}
-      </span>
-    </button>
-  )
-}
+import { PersonalInfoSection } from "./_info-section"
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -153,10 +91,11 @@ export default async function ProfilPage() {
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-4">
           Persönliche Informationen
         </p>
-        <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-6">
-          <InfoRow label="Name"   value={name}  action={{ label: "Bearbeiten" }} />
-          <InfoRow label="E-Mail" value={email} action={{ label: "Ändern" }} />
-        </div>
+        <PersonalInfoSection
+          initialName={name}
+          email={email}
+          initialAvatarUrl={profile?.avatar_url ?? null}
+        />
       </section>
 
       {/* Lernfortschritt */}
@@ -195,7 +134,6 @@ export default async function ProfilPage() {
           Einstellungen
         </p>
         <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-6">
-          <SettingsRow label="Passwort" value="••••••••" cta="Ändern" />
           <LogoutButton />
         </div>
       </section>

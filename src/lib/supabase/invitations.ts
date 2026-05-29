@@ -39,10 +39,15 @@ export async function markInvitationUsed(token: string, usedBy: string): Promise
 
 export async function setSponsor(userId: string, sponsorId: string): Promise<void> {
   const admin = createAdminClient()
-  await admin
+  const { error } = await admin
     .from("profiles")
     .update({ sponsor_id: sponsorId })
     .eq("id", userId)
+  if (error) {
+    // Non-fatal: the DB trigger sets sponsor_id atomically on signup.
+    // Log so we can detect admin-client issues without blocking registration.
+    console.error("[setSponsor] failed for user", userId, "—", error.message)
+  }
 }
 
 export async function setConsent(userId: string): Promise<void> {
