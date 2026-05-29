@@ -5,6 +5,7 @@ import {
   progressPct,
 } from "@/lib/data/academy"
 import { getCurrentUser, userFullName, userInitials } from "@/lib/data/user"
+import { LogoutButton } from "@/components/features/LogoutButton"
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -184,7 +185,7 @@ export default function ProfilPage() {
         <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-6">
           <SettingsRow label="Sprache"  value={user.language} cta="Ändern" />
           <SettingsRow label="Passwort" value="••••••••"       cta="Ändern" />
-          <SettingsRow label="Konto"    cta="Abmelden"         danger />
+          <LogoutButton />
         </div>
       </section>
 

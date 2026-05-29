@@ -1,14 +1,17 @@
 "use client"
 
+import { useActionState } from "react"
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import { register } from "@/lib/supabase/actions"
 
 function RegisterForm() {
   const params     = useSearchParams()
-  const inviterRef = params.get("ref")   // e.g. "mock-user-1"
+  const inviterRef = params.get("ref")
   const hasInvite  = Boolean(inviterRef)
+  const [state, action, pending] = useActionState(register, null)
 
   if (!hasInvite) {
     return (
@@ -62,9 +65,14 @@ function RegisterForm() {
           </p>
         </div>
 
+        {state?.error && (
+          <div className="mb-4 px-4 py-3 bg-[#FDF2F0] border border-[#E8C4BC] rounded-xl text-[13px] text-[#8A4A3C]">
+            {state.error}
+          </div>
+        )}
+
         {/* Form */}
-        <form className="space-y-3">
-          {/* Hidden ref token — will be submitted with form to attribute team membership */}
+        <form action={action} className="space-y-3">
           <input type="hidden" name="ref" value={inviterRef ?? ""} />
 
           <div className="grid grid-cols-2 gap-3">
@@ -77,6 +85,7 @@ function RegisterForm() {
                 name="firstName"
                 autoComplete="given-name"
                 placeholder="Lea"
+                required
                 className="w-full px-4 py-3 text-[14px] bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl text-[#1A1714] placeholder:text-[#C4B9B0] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]/15 focus:border-[#5B2D8E]/30 transition-all"
               />
             </div>
@@ -89,6 +98,7 @@ function RegisterForm() {
                 name="lastName"
                 autoComplete="family-name"
                 placeholder="Fischer"
+                required
                 className="w-full px-4 py-3 text-[14px] bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl text-[#1A1714] placeholder:text-[#C4B9B0] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]/15 focus:border-[#5B2D8E]/30 transition-all"
               />
             </div>
@@ -103,6 +113,7 @@ function RegisterForm() {
               name="email"
               autoComplete="email"
               placeholder="deine@email.de"
+              required
               className="w-full px-4 py-3 text-[14px] bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl text-[#1A1714] placeholder:text-[#C4B9B0] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]/15 focus:border-[#5B2D8E]/30 transition-all"
             />
           </div>
@@ -116,6 +127,8 @@ function RegisterForm() {
               name="password"
               autoComplete="new-password"
               placeholder="Mindestens 8 Zeichen"
+              required
+              minLength={8}
               className="w-full px-4 py-3 text-[14px] bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl text-[#1A1714] placeholder:text-[#C4B9B0] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]/15 focus:border-[#5B2D8E]/30 transition-all"
             />
           </div>
@@ -123,9 +136,10 @@ function RegisterForm() {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-3 bg-[#5B2D8E] text-white text-[14px] font-medium rounded-xl hover:bg-[#4A2478] transition-colors"
+              disabled={pending}
+              className="w-full py-3 bg-[#5B2D8E] text-white text-[14px] font-medium rounded-xl hover:bg-[#4A2478] transition-colors disabled:opacity-60"
             >
-              Konto erstellen
+              {pending ? "Konto wird erstellt …" : "Konto erstellen"}
             </button>
           </div>
         </form>

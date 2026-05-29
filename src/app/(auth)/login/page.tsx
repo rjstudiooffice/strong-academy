@@ -1,7 +1,12 @@
-import Link from "next/link"
+"use client"
+
+import { useActionState } from "react"
 import Image from "next/image"
+import { login } from "@/lib/supabase/actions"
 
 export default function LoginPage() {
+  const [state, action, pending] = useActionState(login, null)
+
   return (
     <div className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
@@ -24,16 +29,24 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {state?.error && (
+          <div className="mb-4 px-4 py-3 bg-[#FDF2F0] border border-[#E8C4BC] rounded-xl text-[13px] text-[#8A4A3C]">
+            {state.error}
+          </div>
+        )}
+
         {/* Form */}
-        <form className="space-y-3">
+        <form action={action} className="space-y-3">
           <div>
             <label className="block text-[11px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1.5">
               E-Mail
             </label>
             <input
               type="email"
+              name="email"
               autoComplete="email"
               placeholder="deine@email.de"
+              required
               className="w-full px-4 py-3 text-[14px] bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl text-[#1A1714] placeholder:text-[#C4B9B0] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]/15 focus:border-[#5B2D8E]/30 transition-all"
             />
           </div>
@@ -49,8 +62,10 @@ export default function LoginPage() {
             </div>
             <input
               type="password"
+              name="password"
               autoComplete="current-password"
               placeholder="••••••••"
+              required
               className="w-full px-4 py-3 text-[14px] bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl text-[#1A1714] placeholder:text-[#C4B9B0] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]/15 focus:border-[#5B2D8E]/30 transition-all"
             />
           </div>
@@ -58,9 +73,10 @@ export default function LoginPage() {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-3 bg-[#5B2D8E] text-white text-[14px] font-medium rounded-xl hover:bg-[#4A2478] transition-colors"
+              disabled={pending}
+              className="w-full py-3 bg-[#5B2D8E] text-white text-[14px] font-medium rounded-xl hover:bg-[#4A2478] transition-colors disabled:opacity-60"
             >
-              Anmelden
+              {pending ? "Anmelden …" : "Anmelden"}
             </button>
           </div>
         </form>
