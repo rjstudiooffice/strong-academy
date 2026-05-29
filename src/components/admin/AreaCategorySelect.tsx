@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { BunnyVideoPicker } from "./BunnyVideoPicker"
 
 type Category = {
   id:           string
@@ -10,9 +11,12 @@ type Category = {
 }
 
 interface Props {
-  categories:        Category[]
-  defaultCategoryId?: string
-  defaultAreaSlug?:   string
+  categories:             Category[]
+  defaultCategoryId?:     string
+  defaultAreaSlug?:       string
+  defaultVideoId?:        string | null
+  defaultVideoUrl?:       string | null
+  defaultDurationSeconds?: number | null
 }
 
 const AREA_LABELS: Record<string, string> = {
@@ -20,24 +24,27 @@ const AREA_LABELS: Record<string, string> = {
   leadership: "Leadership",
 }
 
-export function AreaCategorySelect({ categories, defaultCategoryId, defaultAreaSlug }: Props) {
-  // Derive initial area from default category if not explicitly provided
+export function AreaCategorySelect({
+  categories,
+  defaultCategoryId,
+  defaultAreaSlug,
+  defaultVideoId,
+  defaultVideoUrl,
+  defaultDurationSeconds,
+}: Props) {
   const initialArea = defaultAreaSlug
     ?? categories.find((c) => c.id === defaultCategoryId)?.area_slug
     ?? "academy"
 
-  const [area, setArea]         = useState(initialArea)
-  const [catId, setCatId]       = useState(defaultCategoryId ?? "")
+  const [area,  setArea]  = useState(initialArea)
+  const [catId, setCatId] = useState(defaultCategoryId ?? "")
 
-  const filteredCats = categories.filter(
-    (c) => c.area_slug === area
-  )
-
-  const selectedCat = filteredCats.find((c) => c.id === catId)
+  const filteredCats = categories.filter((c) => c.area_slug === area)
+  const selectedCat  = filteredCats.find((c) => c.id === catId)
 
   function handleAreaChange(newArea: string) {
     setArea(newArea)
-    setCatId("")  // reset category when area changes
+    setCatId("")
   }
 
   return (
@@ -78,7 +85,7 @@ export function AreaCategorySelect({ categories, defaultCategoryId, defaultAreaS
         </div>
       </div>
 
-      {/* Step 2: Category (filtered by area) */}
+      {/* Step 2: Category */}
       <div>
         <label className="block text-[12px] font-semibold text-[#6B5E52] mb-1.5">
           Kategorie *
@@ -97,22 +104,22 @@ export function AreaCategorySelect({ categories, defaultCategoryId, defaultAreaS
         </select>
       </div>
 
-      {/* Video prefix info — Bunny preparation */}
-      {selectedCat?.video_prefix && (
-        <div className="flex items-start gap-3 bg-[#F5F0E8] border border-[#E8E2D9] rounded-xl px-4 py-3">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold text-[#9E9188] uppercase tracking-wider mb-0.5">
-              Bunny Video-Präfix
-            </p>
-            <p className="text-[13px] font-mono text-[#5B2D8E]">
-              {selectedCat.video_prefix}
-            </p>
-            <p className="text-[11px] text-[#B8AFA7] mt-0.5">
-              Bunny-Videos werden automatisch nach diesem Präfix gefiltert.
-            </p>
-          </div>
+      {/* Step 3: Bunny Video Picker — appears after category with prefix is selected */}
+      {selectedCat?.video_prefix ? (
+        <div className="border-t border-[#E8E2D9] pt-4">
+          <BunnyVideoPicker
+            prefix={selectedCat.video_prefix}
+            defaultVideoId={defaultVideoId}
+            defaultVideoUrl={defaultVideoUrl}
+            defaultDurationSeconds={defaultDurationSeconds}
+          />
         </div>
-      )}
+      ) : catId ? (
+        // Category selected but no video prefix (library)
+        <div className="border-t border-[#E8E2D9] pt-4 text-[12px] text-[#B8AFA7]">
+          Diese Kategorie verwendet kein Bunny Stream Video.
+        </div>
+      ) : null}
     </div>
   )
 }

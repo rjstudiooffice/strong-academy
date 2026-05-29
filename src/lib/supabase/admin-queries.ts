@@ -32,6 +32,7 @@ export type AdminLesson = {
   slug: string
   title: string
   description: string | null
+  video_id: string | null
   video_url: string | null
   thumbnail_url: string | null
   cover_gradient: string | null
@@ -157,7 +158,7 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
   const { data } = await admin
     .from("lessons")
     .select(`
-      id, category_id, slug, title, description, video_url, thumbnail_url,
+      id, category_id, slug, title, description, video_id, video_url, thumbnail_url,
       cover_gradient, duration_seconds, sort_order, is_published, created_at, updated_at,
       categories!inner(name, slug)
     `)
@@ -178,7 +179,7 @@ export async function getAdminLessonById(id: string): Promise<AdminLesson | null
   const { data } = await admin
     .from("lessons")
     .select(`
-      id, category_id, slug, title, description, video_url, thumbnail_url,
+      id, category_id, slug, title, description, video_id, video_url, thumbnail_url,
       cover_gradient, duration_seconds, sort_order, is_published, created_at, updated_at,
       categories!inner(name, slug)
     `)

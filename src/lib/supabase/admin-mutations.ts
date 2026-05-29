@@ -106,16 +106,17 @@ export async function createLesson(formData: FormData): Promise<void> {
   const admin = createAdminClient()
 
   const payload = {
-    category_id:     formData.get("category_id") as string,
-    title:           formData.get("title") as string,
-    slug:            formData.get("slug") as string,
-    description:     formData.get("description") as string || null,
-    video_url:       formData.get("video_url") as string || null,
-    thumbnail_url:   formData.get("thumbnail_url") as string || null,
-    cover_gradient:  formData.get("cover_gradient") as string || null,
+    category_id:      formData.get("category_id") as string,
+    title:            formData.get("title") as string,
+    slug:             formData.get("slug") as string,
+    description:      formData.get("description") as string || null,
+    video_id:         formData.get("video_id") as string || null,
+    video_url:        formData.get("video_url") as string || null,
+    thumbnail_url:    formData.get("thumbnail_url") as string || null,
+    cover_gradient:   formData.get("cover_gradient") as string || null,
     duration_seconds: parseInt(formData.get("duration_seconds") as string) || null,
-    sort_order:      parseInt(formData.get("sort_order") as string) || 0,
-    is_published:    formData.get("is_published") === "true",
+    sort_order:       parseInt(formData.get("sort_order") as string) || 0,
+    is_published:     formData.get("is_published") === "true",
   }
 
   const { error } = await admin.from("lessons").insert(payload)
@@ -131,16 +132,17 @@ export async function updateLesson(id: string, formData: FormData): Promise<void
   const admin = createAdminClient()
 
   const payload = {
-    category_id:     formData.get("category_id") as string,
-    title:           formData.get("title") as string,
-    slug:            formData.get("slug") as string,
-    description:     formData.get("description") as string || null,
-    video_url:       formData.get("video_url") as string || null,
-    thumbnail_url:   formData.get("thumbnail_url") as string || null,
-    cover_gradient:  formData.get("cover_gradient") as string || null,
+    category_id:      formData.get("category_id") as string,
+    title:            formData.get("title") as string,
+    slug:             formData.get("slug") as string,
+    description:      formData.get("description") as string || null,
+    video_id:         formData.get("video_id") as string || null,
+    video_url:        formData.get("video_url") as string || null,
+    thumbnail_url:    formData.get("thumbnail_url") as string || null,
+    cover_gradient:   formData.get("cover_gradient") as string || null,
     duration_seconds: parseInt(formData.get("duration_seconds") as string) || null,
-    sort_order:      parseInt(formData.get("sort_order") as string) || 0,
-    is_published:    formData.get("is_published") === "true",
+    sort_order:       parseInt(formData.get("sort_order") as string) || 0,
+    is_published:     formData.get("is_published") === "true",
   }
 
   const { error } = await admin.from("lessons").update(payload).eq("id", id)

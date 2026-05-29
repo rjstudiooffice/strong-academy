@@ -53,10 +53,13 @@ export default async function LektionBearbeitenPage({
 
       <form action={action} className="bg-white border border-[#E8E2D9] rounded-2xl p-6 space-y-5">
 
-        {/* Bereich → Kategorie */}
+        {/* Bereich → Kategorie → Bunny Video */}
         <AreaCategorySelect
           categories={trackableCategories}
           defaultCategoryId={lesson.category_id}
+          defaultVideoId={lesson.video_id}
+          defaultVideoUrl={lesson.video_url}
+          defaultDurationSeconds={lesson.duration_seconds}
         />
 
         <div className="border-t border-[#E8E2D9] pt-5">
@@ -77,25 +80,7 @@ export default async function LektionBearbeitenPage({
           <textarea name="description" rows={3} defaultValue={lesson.description ?? ""} className={INPUT} />
         </div>
 
-        <div className="pt-2 border-t border-[#E8E2D9]">
-          <p className="text-[11px] font-semibold text-[#9E9188] uppercase tracking-wider mb-3">Video</p>
-          <div>
-            <label className={LABEL}>Video-URL</label>
-            <input
-              name="video_url"
-              type="text"
-              defaultValue={lesson.video_url ?? ""}
-              placeholder="https://iframe.mediadelivery.net/embed/LIBRARY_ID/VIDEO_ID"
-              className={INPUT}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Dauer (Sekunden)</label>
-            <input name="duration_seconds" type="number" defaultValue={lesson.duration_seconds ?? ""} placeholder="300" className={INPUT} />
-          </div>
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <label className={LABEL}>Reihenfolge</label>
             <input name="sort_order" type="number" defaultValue={lesson.sort_order} className={INPUT} />

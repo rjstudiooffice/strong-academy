@@ -56,27 +56,8 @@ export default async function NeueLektionPage() {
           </div>
 
           <div>
-            <label className={LABEL}>Bunny Stream Embed-URL</label>
-            <input
-              name="video_url"
-              type="text"
-              placeholder="https://iframe.mediadelivery.net/embed/LIBRARY_ID/VIDEO_ID"
-              className={INPUT}
-            />
-            <p className="mt-1.5 text-[11px] text-[#B8AFA7]">
-              Wird später über den Bunny Video-Picker ausgefüllt.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={LABEL}>Dauer (Sekunden)</label>
-              <input name="duration_seconds" type="number" placeholder="300" className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Reihenfolge</label>
-              <input name="sort_order" type="number" defaultValue={0} className={INPUT} />
-            </div>
+            <label className={LABEL}>Reihenfolge</label>
+            <input name="sort_order" type="number" defaultValue={0} className={INPUT} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
