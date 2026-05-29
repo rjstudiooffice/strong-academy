@@ -3,8 +3,8 @@
 import { Search } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
-import type { Profile } from "@/lib/supabase/profile"
-import { profileInitials } from "@/lib/supabase/profile"
+import type { Profile } from "@/lib/supabase/profile-helpers"
+import { profileInitials } from "@/lib/supabase/profile-helpers"
 
 type Props = { profile: Profile | null }
 
