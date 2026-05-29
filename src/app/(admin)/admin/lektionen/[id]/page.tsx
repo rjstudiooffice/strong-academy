@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Plus } from "lucide-react"
 import { getAdminLessonById, getAdminLessonFiles, getAdminCategories } from "@/lib/supabase/admin-queries"
 import { updateLesson, createLessonFile, deleteLessonFile } from "@/lib/supabase/admin-mutations"
+import { DeleteButton } from "@/components/admin/DeleteButton"
+import { ImageUpload } from "@/components/admin/ImageUpload"
 import { formatDuration } from "@/lib/supabase/content"
 
 export const dynamic = "force-dynamic"
@@ -99,13 +101,15 @@ export default async function LektionBearbeitenPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <ImageUpload
+            name="thumbnail_url"
+            label="Thumbnail"
+            defaultValue={lesson.thumbnail_url ?? ""}
+            folder={`lessons/${id}`}
+          />
           <div>
-            <label className={LABEL}>Thumbnail URL</label>
-            <input name="thumbnail_url" type="text" defaultValue={lesson.thumbnail_url ?? ""} className={INPUT} />
-          </div>
-          <div>
-            <label className={LABEL}>Cover-Gradient</label>
+            <label className={LABEL}>Cover-Gradient (Fallback)</label>
             <input name="cover_gradient" type="text" defaultValue={lesson.cover_gradient ?? ""} className={INPUT} />
           </div>
         </div>
@@ -146,17 +150,13 @@ export default async function LektionBearbeitenPage({
                   <p className="text-[13px] font-medium text-[#1A1714] truncate">{file.title}</p>
                   <p className="text-[11px] text-[#B8AFA7] truncate mt-0.5">{file.file_url}</p>
                 </div>
-                <form action={deleteLessonFile}>
-                  <input type="hidden" name="id" value={file.id} />
-                  <input type="hidden" name="lesson_id" value={id} />
-                  <button
-                    type="submit"
-                    className="p-2 rounded-lg text-[#C4574A] hover:bg-[#FEF2F1] transition-colors shrink-0"
-                    onClick={(e) => { if (!confirm(`"${file.title}" wirklich entfernen?`)) e.preventDefault() }}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
-                  </button>
-                </form>
+                <DeleteButton
+                  action={deleteLessonFile}
+                  id={file.id}
+                  confirmText={`"${file.title}" wirklich entfernen?`}
+                  extraFields={{ lesson_id: id }}
+                  variant="icon"
+                />
               </div>
             ))}
           </div>

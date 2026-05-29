@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { getAdminCategoryById } from "@/lib/supabase/admin-queries"
 import { updateCategory } from "@/lib/supabase/admin-mutations"
+import { ImageUpload } from "@/components/admin/ImageUpload"
 
 export const dynamic = "force-dynamic"
 
@@ -75,18 +76,22 @@ export default async function KategorieBearbeitenPage({
         </div>
 
         <div className="pt-2 border-t border-[#E8E2D9]">
-          <p className="text-[11px] font-semibold text-[#9E9188] uppercase tracking-wider mb-3">Bilder</p>
-          <div className="space-y-3">
+          <p className="text-[11px] font-semibold text-[#9E9188] uppercase tracking-wider mb-4">Bilder</p>
+          <div className="space-y-5">
+            <ImageUpload
+              name="cover_image_url"
+              label="Cover-Bild (Kategorie-Karte)"
+              defaultValue={cat.cover_image_url ?? ""}
+              folder={`categories/${cat.id}`}
+            />
+            <ImageUpload
+              name="hero_image_url"
+              label="Hero-Bild (Kategorie-Detail)"
+              defaultValue={cat.hero_image_url ?? ""}
+              folder={`categories/${cat.id}`}
+            />
             <div>
-              <label className={LABEL}>Cover-Bild URL (Kategorie-Karte)</label>
-              <input name="cover_image_url" type="text" defaultValue={cat.cover_image_url ?? ""} placeholder="/produktwissen_category_card.png" className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Hero-Bild URL (Kategorie-Detail)</label>
-              <input name="hero_image_url" type="text" defaultValue={cat.hero_image_url ?? ""} placeholder="/produktwissen_hero.png" className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>Cover-Gradient (Tailwind)</label>
+              <label className={LABEL}>Cover-Gradient (Tailwind, Fallback)</label>
               <input name="cover_gradient" type="text" defaultValue={cat.cover_gradient ?? ""} placeholder="from-[#9EB88C] to-[#7A9C68]" className={INPUT} />
             </div>
           </div>

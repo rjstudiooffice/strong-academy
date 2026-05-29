@@ -1,12 +1,11 @@
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Clock, ArrowUpRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react"
 import { getLessonNavContext, formatDuration, type ContentLessonFile } from "@/lib/supabase/content"
 import { getProfile } from "@/lib/supabase/profile"
 import { getLessonsWithProgress, type LessonProgress } from "@/lib/supabase/progress"
 import { notFound } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { MediaCover } from "@/components/features/MediaCover"
-import { LessonProgressControls } from "./_controls"
+import { VideoPlayer } from "@/components/features/VideoPlayer"
 
 export const dynamic = "force-dynamic"
 
@@ -82,48 +81,20 @@ export default async function LessonPage({
         {category.name}
       </Link>
 
-      {/* Video */}
-      <section>
-        <div className="rounded-2xl shadow-[0_4px_40px_rgba(26,23,20,0.10),_0_1px_6px_rgba(26,23,20,0.06)]">
-          {lesson.video_url ? (
-            <div className="aspect-video w-full rounded-2xl overflow-hidden">
-              <iframe
-                src={lesson.video_url}
-                className="w-full h-full"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          ) : (
-            <MediaCover
-              gradient={lesson.cover_gradient ?? "from-[#B0A898] to-[#8C8070]"}
-              imageSrc={lesson.thumbnail_url ?? undefined}
-              className="aspect-video w-full rounded-2xl"
-            >
-              <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-4">
-                <span className="text-[11px] font-semibold text-white/65 uppercase tracking-widest">
-                  {String(index + 1).padStart(2, "0")} / {String(catTotal).padStart(2, "0")}
-                </span>
-                <span className="flex items-center gap-1.5 bg-black/18 backdrop-blur-sm px-3 py-1 rounded-full">
-                  <Clock className="w-3 h-3 text-white/70" strokeWidth={1.75} />
-                  <span className="text-[11px] font-medium text-white/70">{formatDuration(lesson.duration_seconds)}</span>
-                </span>
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="w-16 h-16 rounded-full bg-white/75 backdrop-blur-md ring-1 ring-white/25 flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.18)]">
-                  <span className="text-[#5B2D8E] text-xs font-medium">Video folgt</span>
-                </span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 px-6 pb-5 pt-10 bg-gradient-to-t from-black/32 via-black/10 to-transparent">
-                <p className="text-[10px] font-semibold text-white/55 uppercase tracking-widest mb-1.5">
-                  {category.tagline}
-                </p>
-                <p className="text-[15px] font-semibold text-white/90 leading-snug">{lesson.title}</p>
-              </div>
-            </MediaCover>
-          )}
-        </div>
-      </section>
+      {/* Video + Progress */}
+      <VideoPlayer
+        lessonId={lessonId}
+        videoUrl={lesson.video_url}
+        thumbnailUrl={lesson.thumbnail_url}
+        coverGradient={lesson.cover_gradient}
+        title={lesson.title}
+        categoryTagline={category.tagline}
+        durationSeconds={lesson.duration_seconds}
+        lessonIndex={index}
+        totalLessons={catTotal}
+        initialProgress={progressPercent}
+        initialCompleted={completed}
+      />
 
       {/* Content + sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10 pt-2">
@@ -140,20 +111,6 @@ export default async function LessonPage({
             <p className="text-[15px] text-[#8C7E6F] leading-relaxed max-w-[52ch]">
               {lesson.description}
             </p>
-          </div>
-
-          <div className="pt-1">
-            {lessonId ? (
-              <LessonProgressControls
-                lessonId={lessonId}
-                initialProgress={progressPercent}
-                initialCompleted={completed}
-              />
-            ) : (
-              <p className="text-[13px] text-[#C4B9B0]">
-                Lektion noch nicht in der Datenbank — Migration ausführen.
-              </p>
-            )}
           </div>
 
           {lesson.lesson_files.length > 0 && (

@@ -294,3 +294,120 @@ export async function toggleLeadershipUnlock(formData: FormData): Promise<void> 
 
   revalidatePath("/admin/benutzer")
 }
+
+export async function changeUserRole(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+
+  const id   = formData.get("id") as string
+  const role = formData.get("role") as "admin" | "partner"
+
+  const { error } = await admin
+    .from("profiles")
+    .update({ role })
+    .eq("id", id)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath("/admin/benutzer")
+}
+
+// ─── Reorder ─────────────────────────────────────────────────────────────────
+
+export async function reorderCategoryUp(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+  const id = formData.get("id") as string
+
+  const { data: cur } = await admin
+    .from("categories").select("id, sort_order, type").eq("id", id).single()
+  if (!cur) return
+
+  const { data: prev } = await admin
+    .from("categories").select("id, sort_order")
+    .eq("type", cur.type).lt("sort_order", cur.sort_order)
+    .order("sort_order", { ascending: false }).limit(1).single()
+  if (!prev) return
+
+  await Promise.all([
+    admin.from("categories").update({ sort_order: prev.sort_order }).eq("id", cur.id),
+    admin.from("categories").update({ sort_order: cur.sort_order  }).eq("id", prev.id),
+  ])
+
+  revalidatePath("/admin/kategorien")
+  revalidatePath("/academy")
+  revalidatePath("/leadership")
+}
+
+export async function reorderCategoryDown(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+  const id = formData.get("id") as string
+
+  const { data: cur } = await admin
+    .from("categories").select("id, sort_order, type").eq("id", id).single()
+  if (!cur) return
+
+  const { data: nxt } = await admin
+    .from("categories").select("id, sort_order")
+    .eq("type", cur.type).gt("sort_order", cur.sort_order)
+    .order("sort_order", { ascending: true }).limit(1).single()
+  if (!nxt) return
+
+  await Promise.all([
+    admin.from("categories").update({ sort_order: nxt.sort_order }).eq("id", cur.id),
+    admin.from("categories").update({ sort_order: cur.sort_order }).eq("id", nxt.id),
+  ])
+
+  revalidatePath("/admin/kategorien")
+  revalidatePath("/academy")
+  revalidatePath("/leadership")
+}
+
+export async function reorderLessonUp(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+  const id = formData.get("id") as string
+
+  const { data: cur } = await admin
+    .from("lessons").select("id, sort_order, category_id").eq("id", id).single()
+  if (!cur) return
+
+  const { data: prev } = await admin
+    .from("lessons").select("id, sort_order")
+    .eq("category_id", cur.category_id).lt("sort_order", cur.sort_order)
+    .order("sort_order", { ascending: false }).limit(1).single()
+  if (!prev) return
+
+  await Promise.all([
+    admin.from("lessons").update({ sort_order: prev.sort_order }).eq("id", cur.id),
+    admin.from("lessons").update({ sort_order: cur.sort_order  }).eq("id", prev.id),
+  ])
+
+  revalidatePath("/admin/lektionen")
+  revalidatePath("/academy")
+}
+
+export async function reorderLessonDown(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+  const id = formData.get("id") as string
+
+  const { data: cur } = await admin
+    .from("lessons").select("id, sort_order, category_id").eq("id", id).single()
+  if (!cur) return
+
+  const { data: nxt } = await admin
+    .from("lessons").select("id, sort_order")
+    .eq("category_id", cur.category_id).gt("sort_order", cur.sort_order)
+    .order("sort_order", { ascending: true }).limit(1).single()
+  if (!nxt) return
+
+  await Promise.all([
+    admin.from("lessons").update({ sort_order: nxt.sort_order }).eq("id", cur.id),
+    admin.from("lessons").update({ sort_order: cur.sort_order }).eq("id", nxt.id),
+  ])
+
+  revalidatePath("/admin/lektionen")
+  revalidatePath("/academy")
+}

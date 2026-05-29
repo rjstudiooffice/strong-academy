@@ -1,5 +1,8 @@
 import { getAdminUsers } from "@/lib/supabase/admin-queries"
-import { toggleUserActive, toggleLeadershipUnlock } from "@/lib/supabase/admin-mutations"
+import { toggleUserActive, toggleLeadershipUnlock, changeUserRole } from "@/lib/supabase/admin-mutations"
+import { LeadershipToggle } from "@/components/admin/LeadershipToggle"
+import { UserActiveToggle } from "@/components/admin/UserActiveToggle"
+import { RoleToggle } from "@/components/admin/RoleToggle"
 
 export const dynamic = "force-dynamic"
 
@@ -40,9 +43,11 @@ export default async function AdminBenutzerPage({
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider">Name</th>
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider hidden sm:table-cell">Rolle</th>
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider hidden md:table-cell">Leadership</th>
-              <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider hidden md:table-cell">Erstellt</th>
+              <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider hidden lg:table-cell">Erstellt</th>
               <th className="text-left px-5 py-3 font-semibold text-[#9E9188] text-[11px] uppercase tracking-wider">Status</th>
-              <th className="px-5 py-3" />
+              <th className="px-5 py-3 text-right">
+                <span className="text-[11px] font-semibold text-[#9E9188] uppercase tracking-wider">Aktionen</span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E8E2D9]">
@@ -55,49 +60,55 @@ export default async function AdminBenutzerPage({
             )}
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-[#FAF9F6] transition-colors">
+
+                {/* Name + Email */}
                 <td className="px-5 py-4">
                   <p className="font-medium text-[#1A1714]">{user.full_name ?? "—"}</p>
                   <p className="text-[11px] text-[#B8AFA7] mt-0.5">{user.email}</p>
                 </td>
+
+                {/* Rolle — klickbar zum Wechseln */}
                 <td className="px-5 py-4 hidden sm:table-cell">
-                  <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wider ${user.role === "admin" ? "bg-[#F0EBF8] text-[#5B2D8E]" : "bg-[#F5F4F2] text-[#9E9188]"}`}>
-                    {user.role === "admin" ? "Admin" : "Partner"}
-                  </span>
+                  <RoleToggle
+                    action={changeUserRole}
+                    userId={user.id}
+                    role={user.role}
+                    userName={user.full_name ?? user.email}
+                  />
                 </td>
+
+                {/* Leadership — Toggle */}
                 <td className="px-5 py-4 hidden md:table-cell">
-                  <form action={toggleLeadershipUnlock}>
-                    <input type="hidden" name="id" value={user.id} />
-                    <input type="hidden" name="leadership_unlocked" value={String(user.leadership_unlocked)} />
-                    <button
-                      type="submit"
-                      className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wider transition-colors cursor-pointer hover:opacity-70 ${user.leadership_unlocked ? "bg-[#EDF3F0] text-[#3A7A5C]" : "bg-[#F5F4F2] text-[#B8AFA7]"}`}
-                    >
-                      {user.leadership_unlocked ? "Freigeschaltet" : "Gesperrt"}
-                    </button>
-                  </form>
+                  <LeadershipToggle
+                    action={toggleLeadershipUnlock}
+                    userId={user.id}
+                    unlocked={user.leadership_unlocked}
+                    userName={user.full_name ?? user.email}
+                  />
                 </td>
-                <td className="px-5 py-4 text-[#B8AFA7] hidden md:table-cell">
+
+                {/* Erstellt */}
+                <td className="px-5 py-4 text-[#B8AFA7] hidden lg:table-cell">
                   {formatDate(user.created_at)}
                 </td>
+
+                {/* Status Badge */}
                 <td className="px-5 py-4">
-                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${user.is_active ? "bg-[#EDF3F0] text-[#3A7A5C]" : "bg-[#FEF2F1] text-[#C4574A]"}`}>
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                    user.is_active ? "bg-[#EDF3F0] text-[#3A7A5C]" : "bg-[#FEF2F1] text-[#C4574A]"
+                  }`}>
                     {user.is_active ? "Aktiv" : "Deaktiviert"}
                   </span>
                 </td>
-                <td className="px-5 py-4">
-                  <form action={toggleUserActive}>
-                    <input type="hidden" name="id" value={user.id} />
-                    <input type="hidden" name="is_active" value={String(user.is_active)} />
-                    <button
-                      type="submit"
-                      className={`px-3 py-1.5 rounded-lg border text-[12px] font-medium transition-colors ${user.is_active
-                        ? "border-[#E8E2D9] text-[#C4574A] hover:bg-[#FEF2F1] hover:border-[#C4574A]/20"
-                        : "border-[#E8E2D9] text-[#3A7A5C] hover:bg-[#EDF3F0] hover:border-[#3A7A5C]/20"
-                      }`}
-                    >
-                      {user.is_active ? "Deaktivieren" : "Reaktivieren"}
-                    </button>
-                  </form>
+
+                {/* Deaktivieren / Reaktivieren */}
+                <td className="px-5 py-4 text-right">
+                  <UserActiveToggle
+                    action={toggleUserActive}
+                    userId={user.id}
+                    isActive={user.is_active}
+                    userName={user.full_name ?? user.email}
+                  />
                 </td>
               </tr>
             ))}

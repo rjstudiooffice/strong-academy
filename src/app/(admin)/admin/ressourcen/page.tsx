@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { getAdminResources } from "@/lib/supabase/admin-queries"
 import { deleteResource } from "@/lib/supabase/admin-mutations"
+import { DeleteButton } from "@/components/admin/DeleteButton"
 import { Plus, Pencil } from "lucide-react"
 
 export const dynamic = "force-dynamic"
@@ -75,16 +76,12 @@ export default async function AdminRessourcenPage() {
                       <Pencil className="w-3 h-3" strokeWidth={2} />
                       Bearbeiten
                     </Link>
-                    <form action={deleteResource}>
-                      <input type="hidden" name="id" value={res.id} />
-                      <button
-                        type="submit"
-                        className="px-3 py-1.5 rounded-lg border border-[#E8E2D9] text-[12px] text-[#C4574A] hover:bg-[#FEF2F1] hover:border-[#C4574A]/20 transition-colors"
-                        onClick={(e) => { if (!confirm(`"${res.title}" wirklich löschen?`)) e.preventDefault() }}
-                      >
-                        Löschen
-                      </button>
-                    </form>
+                    <DeleteButton
+                      action={deleteResource}
+                      id={res.id}
+                      label="Löschen"
+                      confirmText={`"${res.title}" wirklich löschen?`}
+                    />
                   </div>
                 </td>
               </tr>
