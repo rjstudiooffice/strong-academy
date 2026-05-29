@@ -1,5 +1,3 @@
-import { getOverallProgress } from "./academy"
-
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 export const UNLOCK_THRESHOLD = 75   // % overall progress required
@@ -92,18 +90,19 @@ export function getLeadershipCategoryBySlug(slug: string): LeadershipCategory | 
   return CATEGORIES.find((c) => c.slug === slug)
 }
 
+// Leadership unlock is now DB-backed via profiles.leadership_unlocked.
+// These helpers remain for future use when the unlock logic is wired to DB.
 export function isLeadershipUnlocked(): boolean {
-  return getOverallProgress().pct >= UNLOCK_THRESHOLD
+  return false
 }
 
-export function getProgressToUnlock(): { current: number; needed: number; remaining: number; pct: number } {
-  const current = getOverallProgress().pct
-  const needed  = UNLOCK_THRESHOLD
+export function getProgressToUnlock(currentPct = 0): { current: number; needed: number; remaining: number; pct: number } {
+  const needed = UNLOCK_THRESHOLD
   return {
-    current,
+    current:   currentPct,
     needed,
-    remaining: Math.max(0, needed - current),
-    pct: Math.min(100, Math.round((current / needed) * 100)),
+    remaining: Math.max(0, needed - currentPct),
+    pct:       Math.min(100, Math.round((currentPct / needed) * 100)),
   }
 }
 

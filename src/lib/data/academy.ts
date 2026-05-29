@@ -1,6 +1,6 @@
 // ─── Types ───────────────────────────────────────────────────────────────────
-
-export type LessonStatus = "done" | "progress" | "open"
+// Content configuration — UI metadata only.
+// Progress (completed, pct) comes from DB via lib/supabase/progress.ts.
 
 export type LessonAttachmentType = "PDF" | "PPTX" | "DOCX"
 
@@ -8,7 +8,6 @@ export type LessonAttachment = {
   title: string
   fileType: LessonAttachmentType
   fileSize?: string
-  // href will be a real Supabase Storage URL when integrated
   href?: string
 }
 
@@ -17,10 +16,8 @@ export type Lesson = {
   title: string
   description: string
   duration: string
-  status: LessonStatus
-  pct?: number           // only relevant when status === "progress"
-  cover: string          // tailwind gradient classes
-  attachments?: LessonAttachment[]   // optional — only renders when present
+  cover: string
+  attachments?: LessonAttachment[]
 }
 
 export type Category = {
@@ -29,10 +26,9 @@ export type Category = {
   name: string
   tagline: string
   description: string
-  cover: string        // tailwind gradient fallback
-  coverImage?: string  // category card image
-  heroImage?: string   // category detail banner
-  plannedLessons: number
+  cover: string
+  coverImage?: string
+  heroImage?: string
   lessons: Lesson[]
 }
 
@@ -45,8 +41,6 @@ export type LessonContext = {
 }
 
 // ─── Foundation / Library split ──────────────────────────────────────────────
-// Foundation = structured curriculum, counts toward Leadership unlock
-// Library    = open knowledge collection, no progress tracking
 
 const FOUNDATION_SLUGS = new Set(["produktwissen", "teamaufbau", "kommunikation"])
 
@@ -62,19 +56,8 @@ export function getLibraryCategories(): Category[] {
   return CATEGORIES.filter((c) => !isFoundation(c))
 }
 
-// ─── Computed helpers ────────────────────────────────────────────────────────
-
 export function lessonCount(cat: Category): number {
-  return cat.lessons.length > 0 ? cat.lessons.length : cat.plannedLessons
-}
-
-export function completedCount(cat: Category): number {
-  return cat.lessons.filter((l) => l.status === "done").length
-}
-
-export function progressPct(cat: Category): number {
-  if (cat.lessons.length === 0) return 0
-  return Math.round((completedCount(cat) / cat.lessons.length) * 100)
+  return cat.lessons.length
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -90,23 +73,13 @@ const CATEGORIES: Category[] = [
     cover: "from-[#9EB88C] to-[#7A9C68]",
     coverImage: "/produktwissen_category_card.png",
     heroImage: "/produktwissen_hero.png",
-    plannedLessons: 1,
     lessons: [
       {
-        slug: "was-ist-strong-og",
-        title: "Was ist Strong OG?",
-        description:
-          "Eine Einführung: Strong OG als hochkonzentriertes, flüssiges Vitalstoffpräparat — was es enthält, wie es hergestellt wird und was es von klassischen Kapselpräparaten unterscheidet.",
-        duration: "5 Min.",
-        status: "done",
-        cover: "from-[#A8C094] to-[#7E9E6A]",
-        attachments: [
-          {
-            title: "Produktübersicht Strong OG",
-            fileType: "PDF",
-            fileSize: "2.4 MB",
-          },
-        ],
+        slug:        "was-ist-strong-og",
+        title:       "Was ist Strong OG?",
+        description: "Eine Einführung: Strong OG als hochkonzentriertes, flüssiges Vitalstoffpräparat — was es enthält, wie es hergestellt wird und was es von klassischen Kapselpräparaten unterscheidet.",
+        duration:    "5 Min.",
+        cover:       "from-[#A8C094] to-[#7E9E6A]",
       },
     ],
   },
@@ -120,7 +93,6 @@ const CATEGORIES: Category[] = [
     cover: "from-[#8FAABB] to-[#6A90A6]",
     coverImage: "/teamaufbau_fuehrung_category_card.png",
     heroImage: "/teamaufbau_fuehrung_hero.png",
-    plannedLessons: 0,
     lessons: [],
   },
   {
@@ -133,7 +105,6 @@ const CATEGORIES: Category[] = [
     cover: "from-[#C8A89E] to-[#A88070]",
     coverImage: "/kommunikation_kundenaufbau_category_card.png",
     heroImage: "/kommunikation_kundenaufbau_hero.png",
-    plannedLessons: 0,
     lessons: [],
   },
   {
@@ -146,7 +117,6 @@ const CATEGORIES: Category[] = [
     cover: "from-[#CCAC80] to-[#AA8C5C]",
     coverImage: "/gesundheitsgrundlagen_category_card.png",
     heroImage: "/gesundheitsgrundlagen_hero.png",
-    plannedLessons: 0,
     lessons: [],
   },
   {
@@ -159,7 +129,6 @@ const CATEGORIES: Category[] = [
     cover: "from-[#BCAACE] to-[#9880B4]",
     coverImage: "/persoenliche_entwicklung_category_card.png",
     heroImage: "/persoenliche_entwicklung_hero.png",
-    plannedLessons: 0,
     lessons: [],
   },
   {
@@ -172,7 +141,6 @@ const CATEGORIES: Category[] = [
     cover: "from-[#A6B8C6] to-[#7898AE]",
     coverImage: "/digitale_werkzeuge_category_card.png",
     heroImage: "/digitale_werkzeuge_hero.png",
-    plannedLessons: 0,
     lessons: [],
   },
   {
@@ -185,7 +153,6 @@ const CATEGORIES: Category[] = [
     cover: "from-[#C4A0A8] to-[#A67E88]",
     coverImage: "/social_media_category_card.png",
     heroImage: "/social_media_hero.png",
-    plannedLessons: 0,
     lessons: [],
   },
   {
@@ -198,7 +165,6 @@ const CATEGORIES: Category[] = [
     cover: "from-[#BCAA86] to-[#9A8860]",
     coverImage: "/gewerbe_steuern_category_card.png",
     heroImage: "/gewerbe_steuern_hero.png",
-    plannedLessons: 0,
     lessons: [],
   },
 ]
@@ -231,34 +197,4 @@ export function getAllLessonParams(): { slug: string; lessonSlug: string }[] {
   return CATEGORIES.flatMap((cat) =>
     cat.lessons.map((l) => ({ slug: cat.slug, lessonSlug: l.slug }))
   )
-}
-
-export type OverallProgress = { pct: number; done: number; total: number }
-
-export function getOverallProgress(): OverallProgress {
-  const foundation = CATEGORIES.filter(isFoundation)
-  const total = foundation.reduce((s, c) => s + lessonCount(c), 0)
-  const done  = foundation.reduce((s, c) => s + completedCount(c), 0)
-  return { pct: total > 0 ? Math.round((done / total) * 100) : 0, done, total }
-}
-
-export type NextLessonResult = {
-  category: Category
-  lesson: Lesson
-  index: number
-  isResume: boolean   // true = in-progress, false = new
-}
-
-export function getNextLesson(): NextLessonResult | null {
-  // Prefer first in-progress lesson across all categories
-  for (const category of CATEGORIES) {
-    const idx = category.lessons.findIndex((l) => l.status === "progress")
-    if (idx !== -1) return { category, lesson: category.lessons[idx], index: idx, isResume: true }
-  }
-  // Fall back to first open lesson
-  for (const category of CATEGORIES) {
-    const idx = category.lessons.findIndex((l) => l.status === "open")
-    if (idx !== -1) return { category, lesson: category.lessons[idx], index: idx, isResume: false }
-  }
-  return null
 }

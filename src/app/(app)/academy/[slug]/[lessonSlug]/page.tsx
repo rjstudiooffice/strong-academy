@@ -1,11 +1,15 @@
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Play, CheckCircle2, Clock, ArrowUpRight } from "lucide-react"
-import { getLessonContext, getAllLessonParams, lessonCount, completedCount, type Lesson, type LessonAttachment } from "@/lib/data/academy"
+import { ArrowLeft, ArrowRight, Clock, ArrowUpRight } from "lucide-react"
+import { getLessonContext, lessonCount, type Lesson, type LessonAttachment } from "@/lib/data/academy"
+import { getProfile } from "@/lib/supabase/profile"
+import { getLessonsWithProgress, type LessonProgress } from "@/lib/supabase/progress"
 import { notFound } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { MediaCover } from "@/components/features/MediaCover"
+import { LessonProgressControls } from "./_controls"
 
-// ─── File type badge ─────────────────────────────────────────────────────────
+// Dynamic — user-specific progress
+export const dynamic = "force-dynamic"
 
 const FILE_COLORS: Record<string, string> = {
   PDF:  "bg-[#F0EBF8] text-[#5B2D8E]",
@@ -19,9 +23,7 @@ function AttachmentRow({ file }: { file: LessonAttachment }) {
       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md shrink-0 ${FILE_COLORS[file.fileType] ?? FILE_COLORS.PDF}`}>
         {file.fileType}
       </span>
-      <span className="text-[14px] font-medium text-[#1A1714] flex-1 min-w-0 truncate">
-        {file.title}
-      </span>
+      <span className="text-[14px] font-medium text-[#1A1714] flex-1 min-w-0 truncate">{file.title}</span>
       {file.fileSize && (
         <span className="text-[11px] text-[#B8AFA7] shrink-0 hidden sm:block">{file.fileSize}</span>
       )}
@@ -32,19 +34,19 @@ function AttachmentRow({ file }: { file: LessonAttachment }) {
   )
 }
 
-export function generateStaticParams() {
-  return getAllLessonParams()
+function LessonDot({
+  dbLesson,
+  isCurrent,
+}: {
+  dbLesson: LessonProgress | undefined
+  isCurrent: boolean
+}) {
+  if (isCurrent)                   return <span className="w-1.5 h-1.5 rounded-full bg-[#5B2D8E] shrink-0" />
+  if (dbLesson?.completed)         return <span className="w-1.5 h-1.5 rounded-full bg-[#5B2D8E]/30 shrink-0" />
+  if ((dbLesson?.progress_percent ?? 0) > 0)
+    return <span className="w-1.5 h-1.5 rounded-full bg-[#5B2D8E]/15 border border-[#5B2D8E]/30 shrink-0" />
+  return <span className="w-1.5 h-1.5 rounded-full border border-[#D8D1C7] shrink-0" />
 }
-
-// ─── Status indicator dot (lesson list) ─────────────────────────────────────
-
-function LessonDot({ lesson, isCurrent }: { lesson: Lesson; isCurrent: boolean }) {
-  if (isCurrent)               return <span className="w-1.5 h-1.5 rounded-full bg-[#5B2D8E] shrink-0" />
-  if (lesson.status === "done") return <span className="w-1.5 h-1.5 rounded-full bg-[#5B2D8E]/30 shrink-0" />
-  return                              <span className="w-1.5 h-1.5 rounded-full border border-[#D8D1C7] shrink-0" />
-}
-
-// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default async function LessonPage({
   params,
@@ -56,7 +58,21 @@ export default async function LessonPage({
   if (!ctx) notFound()
 
   const { category, lesson, index, prev, next } = ctx
-  const catProgress = Math.round((completedCount(category) / category.lessons.length) * 100)
+
+  const profile   = await getProfile()
+  const dbLessons = profile ? await getLessonsWithProgress(profile.id, slug) : []
+
+  // Current lesson's DB entry (has the lesson_id UUID + progress)
+  const dbCurrent = dbLessons.find((l) => l.slug === lessonSlug)
+  const lessonId  = dbCurrent?.id ?? null
+
+  const progressPercent = dbCurrent?.progress_percent ?? 0
+  const completed       = dbCurrent?.completed ?? false
+
+  // Category progress for sidebar summary
+  const catCompleted = dbLessons.filter((l) => l.completed).length
+  const catTotal     = dbLessons.length || lessonCount(category)
+  const catPct       = catTotal > 0 ? Math.round((catCompleted / catTotal) * 100) : 0
 
   return (
     <div className="space-y-8 pt-2">
@@ -70,66 +86,48 @@ export default async function LessonPage({
         {category.name}
       </Link>
 
-      {/* ── VIDEO ──────────────────────────────────────────────────────────── */}
+      {/* Video placeholder */}
       <section>
-        {/*
-          Outer wrapper carries the shadow — the overflow-hidden on MediaCover
-          would clip it, so shadow lives one level up.
-        */}
         <div className="rounded-2xl shadow-[0_4px_40px_rgba(26,23,20,0.10),_0_1px_6px_rgba(26,23,20,0.06)]">
-          <MediaCover
-            gradient={lesson.cover}
-            className="aspect-video w-full rounded-2xl"
-          >
-            {/* ── Meta: top row ── */}
+          <MediaCover gradient={lesson.cover} className="aspect-video w-full rounded-2xl">
             <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-4">
-              {/* Position counter */}
               <span className="text-[11px] font-semibold text-white/65 uppercase tracking-widest">
-                {String(index + 1).padStart(2, "0")} / {String(lessonCount(category)).padStart(2, "0")}
+                {String(index + 1).padStart(2, "0")} / {String(catTotal).padStart(2, "0")}
               </span>
-              {/* Duration pill */}
               <span className="flex items-center gap-1.5 bg-black/18 backdrop-blur-sm px-3 py-1 rounded-full">
                 <Clock className="w-3 h-3 text-white/70" strokeWidth={1.75} />
                 <span className="text-[11px] font-medium text-white/70">{lesson.duration}</span>
               </span>
             </div>
 
-            {/* ── Centre: play button ── */}
-            <button className="absolute inset-0 flex items-center justify-center group/play">
+            <div className="absolute inset-0 flex items-center justify-center">
               <span className="
                 w-16 h-16 rounded-full
-                bg-white/75 backdrop-blur-md
-                ring-1 ring-white/25
+                bg-white/75 backdrop-blur-md ring-1 ring-white/25
                 flex items-center justify-center
                 shadow-[0_4px_20px_rgba(0,0,0,0.18)]
-                group-hover/play:bg-white/90 group-hover/play:scale-105
-                transition-all duration-200 ease-out
               ">
-                <Play className="w-6 h-6 text-[#5B2D8E] ml-1" fill="currentColor" strokeWidth={0} />
+                {/* Video integration point: replace with real player */}
+                <span className="text-[#5B2D8E] text-xs font-medium">Video</span>
               </span>
-            </button>
+            </div>
 
-            {/* ── Bottom: title overlay ── */}
             <div className="absolute bottom-0 left-0 right-0 px-6 pb-5 pt-10
               bg-gradient-to-t from-black/32 via-black/10 to-transparent">
               <p className="text-[10px] font-semibold text-white/55 uppercase tracking-widest mb-1.5">
                 {category.tagline}
               </p>
-              <p className="text-[15px] font-semibold text-white/90 leading-snug">
-                {lesson.title}
-              </p>
+              <p className="text-[15px] font-semibold text-white/90 leading-snug">{lesson.title}</p>
             </div>
           </MediaCover>
         </div>
       </section>
 
-      {/* ── CONTENT + LESSON LIST ──────────────────────────────────────────── */}
+      {/* Content + sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10 pt-2">
 
-        {/* Main content */}
         <section className="space-y-8">
 
-          {/* Title + description */}
           <div className="space-y-3">
             <p className="text-[10px] font-semibold text-[#5B2D8E] uppercase tracking-widest">
               {category.tagline}
@@ -142,28 +140,21 @@ export default async function LessonPage({
             </p>
           </div>
 
-          {/* Progress status — read-only, set automatically by video player.
-              Integration point: VideoPlayer fires onProgress(pct) and onComplete()
-              → Supabase upsert into lesson_progress table.
-              No manual override: progress reflects actual watch time only. */}
+          {/* Progress controls — requires lesson to exist in DB */}
           <div className="pt-1">
-            {lesson.status === "done" && (
-              <div className="inline-flex items-center gap-2 text-[13px] text-[#5B2D8E]/55 bg-[#F0EBF8] px-4 py-2 rounded-xl">
-                <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2} />
-                Lektion abgeschlossen
-              </div>
-            )}
-            {lesson.status === "progress" && (
-              <div className="flex items-center gap-4">
-                <div className="h-[2px] w-40 rounded-full bg-[#E3DDD5] overflow-hidden">
-                  <div className="h-full rounded-full bg-[#5B2D8E]/40" style={{ width: `${lesson.pct}%` }} />
-                </div>
-                <span className="text-[11px] text-[#B8AFA7] tabular-nums">{lesson.pct}% gesehen</span>
-              </div>
+            {lessonId ? (
+              <LessonProgressControls
+                lessonId={lessonId}
+                initialProgress={progressPercent}
+                initialCompleted={completed}
+              />
+            ) : (
+              <p className="text-[13px] text-[#C4B9B0]">
+                Lektion noch nicht in der Datenbank — Migration ausführen.
+              </p>
             )}
           </div>
 
-          {/* Attachments — only rendered when present */}
           {lesson.attachments && lesson.attachments.length > 0 && (
             <div className="pt-2 space-y-3">
               <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest">
@@ -178,32 +169,22 @@ export default async function LessonPage({
           {/* Prev / Next */}
           <div className="flex items-center justify-between pt-6 border-t border-[#E8E2D9]">
             {prev ? (
-              <Link
-                href={`/academy/${slug}/${prev.slug}`}
-                className="flex items-center gap-3 group max-w-[45%]"
-              >
+              <Link href={`/academy/${slug}/${prev.slug}`} className="flex items-center gap-3 group max-w-[45%]">
                 <div className="w-8 h-8 rounded-xl bg-[#F5F0E8] border border-[#E8E2D9] flex items-center justify-center shrink-0 group-hover:bg-[#EDE8DF] transition-colors">
                   <ArrowLeft className="w-3.5 h-3.5 text-[#6B5E52]" strokeWidth={2} />
                 </div>
                 <div>
                   <p className="text-[10px] text-[#B8AFA7] uppercase tracking-widest">Vorherige</p>
-                  <p className="text-[13px] font-medium text-[#1A1714] leading-snug line-clamp-1">
-                    {prev.title}
-                  </p>
+                  <p className="text-[13px] font-medium text-[#1A1714] leading-snug line-clamp-1">{prev.title}</p>
                 </div>
               </Link>
             ) : <div />}
 
             {next ? (
-              <Link
-                href={`/academy/${slug}/${next.slug}`}
-                className="flex items-center gap-3 group text-right max-w-[45%]"
-              >
+              <Link href={`/academy/${slug}/${next.slug}`} className="flex items-center gap-3 group text-right max-w-[45%]">
                 <div>
                   <p className="text-[10px] text-[#B8AFA7] uppercase tracking-widest">Nächste</p>
-                  <p className="text-[13px] font-medium text-[#1A1714] leading-snug line-clamp-1">
-                    {next.title}
-                  </p>
+                  <p className="text-[13px] font-medium text-[#1A1714] leading-snug line-clamp-1">{next.title}</p>
                 </div>
                 <div className="w-8 h-8 rounded-xl bg-[#F5F0E8] border border-[#E8E2D9] flex items-center justify-center shrink-0 group-hover:bg-[#EDE8DF] transition-colors">
                   <ArrowRight className="w-3.5 h-3.5 text-[#6B5E52]" strokeWidth={2} />
@@ -214,39 +195,36 @@ export default async function LessonPage({
 
         </section>
 
-        {/* ── Right: Lesson list ── */}
+        {/* Sidebar: category progress + lesson list */}
         <aside className="space-y-4">
-          {/* Category progress summary */}
           <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-4 py-4">
             <div className="flex items-center justify-between mb-2.5">
               <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest">
                 {category.name}
               </p>
               <span className="text-[11px] text-[#B8AFA7] tabular-nums">
-                {completedCount(category)}/{lessonCount(category)}
+                {catCompleted}/{catTotal}
               </span>
             </div>
             <div className="h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
               <div
                 className="h-full rounded-full bg-[#5B2D8E]/35 transition-all duration-700"
-                style={{ width: `${catProgress}%` }}
+                style={{ width: `${catPct}%` }}
               />
             </div>
           </div>
 
-          {/* Lesson rows */}
           <div className="space-y-0.5">
             {category.lessons.map((l, i) => {
               const isCurrent = l.slug === lessonSlug
+              const dbLesson  = dbLessons.find((dl) => dl.slug === l.slug)
               return (
                 <Link
                   key={l.slug}
                   href={`/academy/${slug}/${l.slug}`}
                   className={cn(
                     "flex items-center gap-3 px-3 py-3 rounded-xl transition-all",
-                    isCurrent
-                      ? "bg-white border border-[#E8E2D9] shadow-sm"
-                      : "hover:bg-[#F5F0E8]"
+                    isCurrent ? "bg-white border border-[#E8E2D9] shadow-sm" : "hover:bg-[#F5F0E8]"
                   )}
                 >
                   <span className="text-[11px] text-[#C4B9B0] tabular-nums w-5 shrink-0">
@@ -261,14 +239,14 @@ export default async function LessonPage({
                     </p>
                     <p className="mt-0.5 text-[11px] text-[#B8AFA7]">{l.duration}</p>
                   </div>
-                  <LessonDot lesson={l} isCurrent={isCurrent} />
+                  <LessonDot dbLesson={dbLesson} isCurrent={isCurrent} />
                 </Link>
               )
             })}
           </div>
         </aside>
-      </div>
 
+      </div>
     </div>
   )
 }

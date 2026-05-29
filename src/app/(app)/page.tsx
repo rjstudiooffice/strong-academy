@@ -1,40 +1,45 @@
-import { ArrowRight, Play } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
 import Link from "next/link"
-import { getCategories, getFoundationCategories, progressPct, getOverallProgress, getNextLesson, isFoundation } from "@/lib/data/academy"
-import { getInviteLink } from "@/lib/data/team"
+import { getCategories, getFoundationCategories, isFoundation } from "@/lib/data/academy"
 import { CurrentDate } from "@/components/features/CurrentDate"
 import { InviteButton } from "@/components/features/InviteButton"
 import { getProfile, profileFirstName } from "@/lib/supabase/profile"
+import { getOverallProgress, getFoundationCategoryProgress } from "@/lib/supabase/progress"
 
 export default async function HomePage() {
-  const profile       = await getProfile()
-  const firstName     = profile ? profileFirstName(profile) : ""
-  const inviteLink    = getInviteLink(profile?.id ?? "")
-  const categories    = getCategories()
-  const overall       = getOverallProgress()
-  const nextLesson    = getNextLesson()
+  const profile    = await getProfile()
+  const firstName  = profile ? profileFirstName(profile) : ""
+  const categories = getCategories()
 
-  // Only Foundation categories count for progress display
-  const activeProgress = getFoundationCategories()
-    .map((c) => ({ name: c.name, pct: progressPct(c) }))
+  const [overall, foundationProgress] = profile
+    ? await Promise.all([
+        getOverallProgress(profile.id),
+        getFoundationCategoryProgress(profile.id),
+      ])
+    : [
+        { completed: 0, total: 0, pct: 0 },
+        [] as { slug: string; completed: number; total: number; pct: number }[],
+      ]
+
+  // Map slug → pct for the category grid
+  const progressBySlug = Object.fromEntries(foundationProgress.map((c) => [c.slug, c.pct]))
+
+  // Only show categories with actual progress in the per-category panel
+  const activeProgress = foundationProgress
     .filter((c) => c.pct > 0)
+    .map((c) => ({
+      name: getFoundationCategories().find((fc) => fc.slug === c.slug)?.name ?? c.slug,
+      pct:  c.pct,
+    }))
     .sort((a, b) => b.pct - a.pct)
 
-  // Derive from actual completed lessons — no fake placeholders
-  const recentItems = categories
-    .flatMap((cat) => cat.lessons
-      .filter((l) => l.status === "done" || l.status === "progress")
-      .map((l) => ({ category: cat.name, title: l.title, href: `/academy/${cat.slug}/${l.slug}` }))
-    )
-    .slice(0, 3)
   return (
     <div className="space-y-12">
 
       {/* Hero */}
       <section className="relative overflow-hidden rounded-2xl bg-[#F5F0E8] border border-[#E8E2D9]">
-        {/* Background hero image */}
         <div className="absolute inset-0">
           <Image
             src="/startseite_hero.png"
@@ -44,13 +49,11 @@ export default async function HomePage() {
             sizes="(max-width: 768px) 100vw, calc(100vw - 280px)"
             priority
           />
-          {/* Left-to-right fade — keeps text readable */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#F5F0E8] via-[#F5F0E8]/90 sm:via-[#F5F0E8]/75 to-transparent" />
         </div>
 
-        {/* Desktop: Invite button top-right, absolute */}
         <div className="hidden sm:block absolute top-5 right-5 z-20">
-          <InviteButton inviteLink={inviteLink} />
+          <InviteButton />
         </div>
 
         <div className="px-6 py-8 sm:px-10 sm:py-12 max-w-xl relative z-10">
@@ -65,7 +68,6 @@ export default async function HomePage() {
             Wissen, das dein Leben verändert. Entdecke Inhalte, die dich und dein Business auf das nächste Level bringen.
           </p>
 
-          {/* Mobile: both buttons side by side, below description */}
           <div className="mt-6 flex items-center gap-3 flex-wrap">
             <Link
               href="/academy"
@@ -73,9 +75,8 @@ export default async function HomePage() {
             >
               Weiterlernen <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
             </Link>
-            {/* Mobile only — desktop version is absolute top-right */}
             <div className="sm:hidden">
-              <InviteButton inviteLink={inviteLink} />
+              <InviteButton />
             </div>
           </div>
         </div>
@@ -90,11 +91,18 @@ export default async function HomePage() {
             Gesamter Fortschritt
           </p>
           <div>
-            <span className="text-[3rem] font-semibold text-[#5B2D8E] tracking-tight leading-none">{overall.pct}%</span>
+            <span className="text-[3rem] font-semibold text-[#5B2D8E] tracking-tight leading-none">
+              {overall.pct}%
+            </span>
             <div className="mt-4 h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
-              <div className="h-full rounded-full bg-[#5B2D8E]/35 transition-all duration-700" style={{ width: `${overall.pct}%` }} />
+              <div
+                className="h-full rounded-full bg-[#5B2D8E]/35 transition-all duration-700"
+                style={{ width: `${overall.pct}%` }}
+              />
             </div>
-            <p className="mt-3 text-[13px] text-[#B8AFA7]">{overall.done} von {overall.total} Lektionen abgeschlossen.</p>
+            <p className="mt-3 text-[13px] text-[#B8AFA7]">
+              {overall.completed} von {overall.total} Lektionen abgeschlossen.
+            </p>
           </div>
         </div>
 
@@ -103,90 +111,28 @@ export default async function HomePage() {
           <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-6">
             Fortschritt nach Kategorie
           </p>
-          <div className="space-y-5">
-            {activeProgress.map((cat) => (
-              <div key={cat.name}>
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-[13px] text-[#6B5E52]">{cat.name}</span>
-                  <span className="text-[11px] text-[#C4B9B0] tabular-nums">{cat.pct}%</span>
+          {activeProgress.length === 0 ? (
+            <p className="text-[13px] text-[#C4B9B0]">Noch keine Lektionen begonnen.</p>
+          ) : (
+            <div className="space-y-5">
+              {activeProgress.map((cat) => (
+                <div key={cat.name}>
+                  <div className="flex items-baseline justify-between mb-2">
+                    <span className="text-[13px] text-[#6B5E52]">{cat.name}</span>
+                    <span className="text-[11px] text-[#C4B9B0] tabular-nums">{cat.pct}%</span>
+                  </div>
+                  <div className="h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[#5B2D8E]/30 transition-all duration-700"
+                      style={{ width: `${cat.pct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#5B2D8E]/30 transition-all duration-700"
-                    style={{ width: `${cat.pct}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
-
-      {/* Nächste Lektion */}
-      {nextLesson && (
-        <section>
-          <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-4">
-            Nächste Lektion
-          </p>
-          <Link
-            href={`/academy/${nextLesson.category.slug}/${nextLesson.lesson.slug}`}
-            className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] rounded-2xl border border-[#E8E2D9] overflow-hidden flex flex-col sm:flex-row transition-colors block"
-          >
-            <div className={`relative w-full sm:w-52 h-40 sm:h-auto bg-gradient-to-br ${nextLesson.lesson.cover} flex items-center justify-center shrink-0 overflow-hidden`}>
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_20%,_rgba(255,252,245,0.15)_0%,_transparent_70%)]" />
-              <div className="w-11 h-11 rounded-full bg-white/85 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform relative">
-                <Play className="w-4 h-4 text-[#5B2D8E] ml-0.5" fill="currentColor" strokeWidth={0} />
-              </div>
-            </div>
-            <div className="p-7 flex flex-col justify-center gap-1">
-              <p className="text-[10px] font-semibold text-[#5B2D8E] uppercase tracking-widest">
-                {nextLesson.category.tagline}
-              </p>
-              <h3 className="text-[17px] font-semibold text-[#1A1714] leading-snug mt-1">
-                {nextLesson.lesson.title}
-              </h3>
-              <p className="text-[13px] text-[#9E9188] mt-0.5">
-                {nextLesson.lesson.duration} · Lektion {nextLesson.index + 1} von {nextLesson.category.lessons.length}
-              </p>
-              <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#5B2D8E]">
-                {nextLesson.isResume ? "Fortsetzen" : "Starten"}
-                <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
-              </span>
-            </div>
-          </Link>
-        </section>
-      )}
-
-      {/* Zuletzt angesehen — only when there's actual history */}
-      {recentItems.length > 0 && (
-        <section>
-          <div className="flex items-baseline justify-between mb-4">
-            <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest">
-              Zuletzt angesehen
-            </p>
-            <Link href="/academy" className="text-[12px] text-[#5B2D8E] hover:text-[#4A2478] font-medium transition-colors">
-              Alle anzeigen
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {recentItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl px-5 py-5 flex items-center justify-between transition-colors"
-              >
-                <div className="min-w-0 pr-3">
-                  <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1.5">
-                    {item.category}
-                  </p>
-                  <p className="text-[14px] font-medium text-[#1A1714] leading-snug">{item.title}</p>
-                </div>
-                <ArrowRight className="w-3.5 h-3.5 text-[#C4B9B0] shrink-0 group-hover:text-[#5B2D8E] group-hover:translate-x-0.5 transition-all" strokeWidth={2} />
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* Kategorien */}
       <section>
@@ -200,7 +146,7 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {categories.map((cat) => {
-            const pct = progressPct(cat)
+            const pct        = progressBySlug[cat.slug] ?? 0
             const foundation = isFoundation(cat)
             return (
               <Link
@@ -209,9 +155,13 @@ export default async function HomePage() {
                 className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl p-6 transition-all hover:shadow-sm flex flex-col justify-between min-h-[140px]"
               >
                 <div className="flex items-start justify-between">
-                  <p className="text-[15px] font-semibold text-[#1A1714] leading-snug pr-4 hyphens-auto">{cat.name}</p>
+                  <p className="text-[15px] font-semibold text-[#1A1714] leading-snug pr-4 hyphens-auto">
+                    {cat.name}
+                  </p>
                   {foundation && (
-                    <span className="text-[11px] font-medium text-[#C4B9B0] tabular-nums shrink-0 mt-0.5">{cat.index}</span>
+                    <span className="text-[11px] font-medium text-[#C4B9B0] tabular-nums shrink-0 mt-0.5">
+                      {cat.index}
+                    </span>
                   )}
                 </div>
                 <div className="mt-auto pt-5">

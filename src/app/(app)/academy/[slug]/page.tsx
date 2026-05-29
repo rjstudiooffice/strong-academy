@@ -1,14 +1,14 @@
 import Link from "next/link"
 import { ArrowLeft, Play, CheckCircle2, Circle, Clock } from "lucide-react"
-import { getCategoryBySlug, getCategories, lessonCount, completedCount, progressPct, isFoundation, type Lesson } from "@/lib/data/academy"
+import { getCategoryBySlug, getCategories, lessonCount, isFoundation, type Lesson } from "@/lib/data/academy"
+import { getProfile } from "@/lib/supabase/profile"
+import { getLessonsWithProgress, getCategoryProgress, type LessonProgress } from "@/lib/supabase/progress"
 import { MediaCover } from "@/components/features/MediaCover"
 
-export function generateStaticParams() {
-  return getCategories().map((cat) => ({ slug: cat.slug }))
-}
+export const dynamic = "force-dynamic"
 
-function LessonStatus({ lesson }: { lesson: Lesson }) {
-  if (lesson.status === "done") {
+function LessonStatus({ dbLesson }: { dbLesson: LessonProgress | undefined }) {
+  if (dbLesson?.completed) {
     return (
       <span className="flex items-center gap-1.5 text-[12px] text-[#5B2D8E]/55">
         <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2} />
@@ -16,13 +16,13 @@ function LessonStatus({ lesson }: { lesson: Lesson }) {
       </span>
     )
   }
-  if (lesson.status === "progress") {
+  if ((dbLesson?.progress_percent ?? 0) > 0) {
     return (
       <div className="flex items-center gap-2.5">
         <div className="w-24 h-[2px] rounded-full bg-[#E3DDD5] overflow-hidden">
-          <div className="h-full rounded-full bg-[#5B2D8E]/40" style={{ width: `${lesson.pct}%` }} />
+          <div className="h-full rounded-full bg-[#5B2D8E]/40" style={{ width: `${dbLesson!.progress_percent}%` }} />
         </div>
-        <span className="text-[11px] text-[#B8AFA7] tabular-nums">{lesson.pct}%</span>
+        <span className="text-[11px] text-[#B8AFA7] tabular-nums">{dbLesson!.progress_percent}%</span>
       </div>
     )
   }
@@ -41,15 +41,17 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params
   const category = getCategoryBySlug(slug)
-  if (!category) return null   // covered by generateStaticParams
+  if (!category) return null
 
   const foundation = isFoundation(category)
-  const pct = foundation ? progressPct(category) : 0
+
+  const profile   = await getProfile()
+  const dbLessons = profile ? await getLessonsWithProgress(profile.id, slug) : []
+  const progress  = profile ? await getCategoryProgress(profile.id, slug) : { completed: 0, total: 0, pct: 0 }
 
   return (
     <div className="space-y-14 pt-2">
 
-      {/* Back */}
       <Link
         href="/academy"
         className="inline-flex items-center gap-2 text-[13px] text-[#9E9188] hover:text-[#1A1714] transition-colors"
@@ -81,27 +83,25 @@ export default async function CategoryPage({
             {category.description}
           </p>
 
-          {foundation && (
+          {foundation && progress.total > 0 && (
             <div className="mt-6 flex items-center gap-5">
               <div className="flex-1 max-w-xs">
                 <div className="h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
                   <div
                     className="h-full rounded-full bg-[#5B2D8E]/35 transition-all duration-700"
-                    style={{ width: `${pct}%` }}
+                    style={{ width: `${progress.pct}%` }}
                   />
                 </div>
               </div>
               <p className="text-[13px] text-[#9E9188] shrink-0">
-                {lessonCount(category) > 0
-                  ? `${completedCount(category)} von ${lessonCount(category)} ${lessonCount(category) === 1 ? "Lektion" : "Lektionen"}`
-                  : "Inhalte folgen"}
+                {progress.completed} von {progress.total} {progress.total === 1 ? "Lektion" : "Lektionen"}
               </p>
             </div>
           )}
         </div>
       </section>
 
-      {/* Lessons */}
+      {/* Lesson list */}
       <section>
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-6">
           Lektionen
@@ -114,45 +114,42 @@ export default async function CategoryPage({
         )}
 
         <div className="space-y-3">
-          {category.lessons.map((lesson, i) => (
-            <Link
-              key={lesson.slug}
-              href={`/academy/${slug}/${lesson.slug}`}
-              className="group flex flex-col sm:flex-row bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl overflow-hidden transition-all hover:shadow-sm"
-            >
-              {/* Cover */}
-              <MediaCover
-                gradient={lesson.cover}
-                index={foundation ? String(i + 1).padStart(2, "0") : undefined}
-                className="w-full sm:w-52 h-36 sm:h-auto shrink-0"
+          {category.lessons.map((lesson, i) => {
+            const dbLesson = dbLessons.find((dl) => dl.slug === lesson.slug)
+            return (
+              <Link
+                key={lesson.slug}
+                href={`/academy/${slug}/${lesson.slug}`}
+                className="group flex flex-col sm:flex-row bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl overflow-hidden transition-all hover:shadow-sm"
               >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-white/78 backdrop-blur-sm flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                    <Play className="w-3.5 h-3.5 text-[#5B2D8E] ml-0.5" fill="currentColor" strokeWidth={0} />
+                <MediaCover
+                  gradient={lesson.cover}
+                  index={foundation ? String(i + 1).padStart(2, "0") : undefined}
+                  className="w-full sm:w-52 h-36 sm:h-auto shrink-0"
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/78 backdrop-blur-sm flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                      <Play className="w-3.5 h-3.5 text-[#5B2D8E] ml-0.5" fill="currentColor" strokeWidth={0} />
+                    </div>
+                  </div>
+                </MediaCover>
+
+                <div className="flex-1 px-6 py-5 flex flex-col justify-between min-w-0">
+                  <div>
+                    <p className="text-[15px] font-semibold text-[#1A1714] leading-snug">{lesson.title}</p>
+                    <p className="mt-2 text-[13px] text-[#9E9188] leading-relaxed">{lesson.description}</p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-4 flex-wrap">
+                    <span className="flex items-center gap-1.5 text-[12px] text-[#B8AFA7]">
+                      <Clock className="w-3 h-3" strokeWidth={1.75} />
+                      {lesson.duration}
+                    </span>
+                    {foundation && <LessonStatus dbLesson={dbLesson} />}
                   </div>
                 </div>
-              </MediaCover>
-
-              {/* Content */}
-              <div className="flex-1 px-6 py-5 flex flex-col justify-between min-w-0">
-                <div>
-                  <p className="text-[15px] font-semibold text-[#1A1714] leading-snug">
-                    {lesson.title}
-                  </p>
-                  <p className="mt-2 text-[13px] text-[#9E9188] leading-relaxed">
-                    {lesson.description}
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-4 flex-wrap">
-                  <span className="flex items-center gap-1.5 text-[12px] text-[#B8AFA7]">
-                    <Clock className="w-3 h-3" strokeWidth={1.75} />
-                    {lesson.duration}
-                  </span>
-                  {foundation && <LessonStatus lesson={lesson} />}
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       </section>
 

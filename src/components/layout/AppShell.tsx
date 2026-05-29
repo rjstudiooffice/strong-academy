@@ -1,12 +1,22 @@
 import { Sidebar } from "./Sidebar"
 import { Header } from "./Header"
 import { MobileNav } from "./MobileNav"
-import { hasTeamMembers } from "@/lib/data/team"
 import { getProfile } from "@/lib/supabase/profile"
+import { createClient } from "@/lib/supabase/server"
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
-  const profile          = await getProfile()
-  const showTeam         = hasTeamMembers()              // TODO: real Supabase team query
+  const profile  = await getProfile()
+  const supabase = await createClient()
+
+  let showTeam = false
+  if (profile) {
+    const { count } = await supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("sponsor_id", profile.id)
+    showTeam = (count ?? 0) > 0
+  }
+
   const leadershipUnlocked = profile?.leadership_unlocked ?? false
 
   return (

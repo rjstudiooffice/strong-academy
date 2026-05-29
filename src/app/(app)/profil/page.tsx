@@ -1,10 +1,7 @@
 import { ChevronRight, LogOut } from "lucide-react"
-import {
-  getFoundationCategories,
-  getOverallProgress,
-  progressPct,
-} from "@/lib/data/academy"
+import { getFoundationCategories } from "@/lib/data/academy"
 import { getProfile, profileInitials } from "@/lib/supabase/profile"
+import { getOverallProgress, getFoundationCategoryProgress } from "@/lib/supabase/progress"
 import { LogoutButton } from "@/components/features/LogoutButton"
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -74,16 +71,26 @@ function SettingsRow({
 export default async function ProfilPage() {
   const profile = await getProfile()
 
-  const name       = profile?.full_name ?? "–"
-  const initials   = profile ? profileInitials(profile) : "?"
-  const email      = profile?.email ?? "–"
+  const name        = profile?.full_name ?? "–"
+  const initials    = profile ? profileInitials(profile) : "?"
+  const email       = profile?.email ?? "–"
   const memberSince = profile
     ? new Date(profile.created_at).toLocaleDateString("de-DE", { month: "long", year: "numeric" })
     : "–"
 
-  const { pct: overallPct, done: doneLessons, total: totalLessons } = getOverallProgress()
+  const [overall, catProgress] = profile
+    ? await Promise.all([
+        getOverallProgress(profile.id),
+        getFoundationCategoryProgress(profile.id),
+      ])
+    : [{ completed: 0, total: 0, pct: 0 }, [] as { slug: string; completed: number; total: number; pct: number }[]]
+
   const foundation       = getFoundationCategories()
-  const activeCategories = foundation.filter((c) => progressPct(c) > 0)
+  const activeCategories = catProgress.filter((c) => c.pct > 0)
+
+  const overallPct   = overall.pct
+  const doneLessons  = overall.completed
+  const totalLessons = overall.total
 
   return (
     <div className="space-y-10 pt-2 max-w-2xl">
@@ -161,17 +168,17 @@ export default async function ProfilPage() {
           <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-6 py-6">
             <div className="space-y-5">
               {activeCategories.map((cat) => {
-                const pct = progressPct(cat)
+                const name = foundation.find((fc) => fc.slug === cat.slug)?.name ?? cat.slug
                 return (
                   <div key={cat.slug}>
                     <div className="flex items-baseline justify-between mb-2">
-                      <span className="text-[13px] text-[#6B5E52]">{cat.name}</span>
-                      <span className="text-[11px] text-[#C4B9B0] tabular-nums">{pct}%</span>
+                      <span className="text-[13px] text-[#6B5E52]">{name}</span>
+                      <span className="text-[11px] text-[#C4B9B0] tabular-nums">{cat.pct}%</span>
                     </div>
                     <div className="h-[2px] w-full rounded-full bg-[#E3DDD5] overflow-hidden">
                       <div
                         className="h-full rounded-full bg-[#5B2D8E]/35 transition-all duration-700"
-                        style={{ width: `${pct}%` }}
+                        style={{ width: `${cat.pct}%` }}
                       />
                     </div>
                   </div>

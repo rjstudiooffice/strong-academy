@@ -39,17 +39,7 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
 
 // ─── Resources ───────────────────────────────────────────────────────────────
 
-const RESOURCES: Resource[] = [
-  {
-    id: "produktuebersicht-strong-og",
-    title: "Produktübersicht Strong OG",
-    description:
-      "Vollständige Übersicht der Inhaltsstoffe, Mineralien und Mikronährstoffe — wissenschaftlich aufbereitet.",
-    fileType: "PDF",
-    fileSize: "2.4 MB",
-    category: "produktinformationen",
-  },
-]
+const RESOURCES: Resource[] = []
 
 // ─── Handouts ────────────────────────────────────────────────────────────────
 
@@ -57,19 +47,11 @@ export type Handout = {
   id: string
   title: string
   description: string
-  relatedLesson?: string   // optional link to an academy lesson
+  relatedLesson?: string
   fileSize?: string
 }
 
-const HANDOUTS: Handout[] = [
-  {
-    id: "zusammenfassung-strong-og",
-    title: "Zusammenfassung: Was ist Strong OG?",
-    description: "Kompakte Lernzusammenfassung zur ersten Lektion.",
-    relatedLesson: "/academy/produktwissen/was-ist-strong-og",
-    fileSize: "420 KB",
-  },
-]
+const HANDOUTS: Handout[] = []
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 

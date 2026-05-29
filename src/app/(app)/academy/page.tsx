@@ -4,13 +4,20 @@ import {
   getFoundationCategories,
   getLibraryCategories,
   lessonCount,
-  progressPct,
 } from "@/lib/data/academy"
+import { getProfile } from "@/lib/supabase/profile"
+import { getFoundationCategoryProgress } from "@/lib/supabase/progress"
 import { MediaCover } from "@/components/features/MediaCover"
 
-export default function AcademyPage() {
+export const dynamic = "force-dynamic"
+
+export default async function AcademyPage() {
   const foundation = getFoundationCategories()
   const library    = getLibraryCategories()
+
+  const profile     = await getProfile()
+  const catProgress = profile ? await getFoundationCategoryProgress(profile.id) : []
+  const progressMap = Object.fromEntries(catProgress.map((c) => [c.slug, c]))
 
   return (
     <div className="space-y-16">
@@ -38,7 +45,7 @@ export default function AcademyPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {foundation.map((cat) => {
-            const pct = progressPct(cat)
+            const pct = progressMap[cat.slug]?.pct ?? 0
             return (
               <Link
                 key={cat.slug}
