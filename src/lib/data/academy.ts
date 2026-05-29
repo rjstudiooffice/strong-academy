@@ -173,8 +173,10 @@ const CATEGORIES: Category[] = [
     name: "Karriereplan",
     tagline: "Karriere & Aufstieg",
     description:
-      "Der Zinzino-Karriereplan — von den ersten Schritten bis zur Diamond-Ebene. Verstehe die Stufen, Voraussetzungen und Möglichkeiten deiner persönlichen Karriereentwicklung.",
+      "Verstehe, wie dein Zinzino-Karriereplan aufgebaut ist — welche Meilensteine es gibt, was sie bedeuten und wie du deinen nächsten Schritt gezielt angehen kannst.",
     cover: "from-[#8ABBB0] to-[#68998E]",
+    coverImage: "/karriereplan_category_card.png",
+    heroImage: "/karriereplan_hero.png",
     lessons: [],
   },
 ]
