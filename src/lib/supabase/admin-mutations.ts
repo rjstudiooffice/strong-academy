@@ -417,6 +417,19 @@ export async function reorderCategoryDown(formData: FormData): Promise<void> {
   revalidatePath("/leadership")
 }
 
+export async function toggleLessonPublished(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin       = createAdminClient()
+  const id          = formData.get("id") as string
+  const isPublished = formData.get("is_published") === "true"
+
+  await admin.from("lessons").update({ is_published: !isPublished }).eq("id", id)
+
+  revalidatePath("/admin/lektionen")
+  revalidatePath("/academy")
+  revalidatePath("/leadership")
+}
+
 export async function reorderLessonUp(formData: FormData): Promise<void> {
   await requireAdmin()
   const admin = createAdminClient()

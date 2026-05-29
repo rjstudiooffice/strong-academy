@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { getAdminLessons, getAdminCategories } from "@/lib/supabase/admin-queries"
-import { deleteLesson, reorderLessonUp, reorderLessonDown } from "@/lib/supabase/admin-mutations"
+import { deleteLesson, reorderLessonUp, reorderLessonDown, toggleLessonPublished } from "@/lib/supabase/admin-mutations"
 import { DeleteButton } from "@/components/admin/DeleteButton"
 import { ReorderButtons } from "@/components/admin/ReorderButtons"
 import { Plus, Pencil, Search } from "lucide-react"
@@ -153,9 +153,20 @@ export default async function AdminLektionenPage({
                     )}
                   </td>
                   <td className="px-5 py-4">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${lesson.is_published ? "bg-[#EDF3F0] text-[#3A7A5C]" : "bg-[#F5F4F2] text-[#B8AFA7]"}`}>
-                      {lesson.is_published ? "Veröffentlicht" : "Entwurf"}
-                    </span>
+                    <form action={toggleLessonPublished}>
+                      <input type="hidden" name="id" value={lesson.id} />
+                      <input type="hidden" name="is_published" value={String(lesson.is_published)} />
+                      <button
+                        type="submit"
+                        className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium cursor-pointer transition-colors ${
+                          lesson.is_published
+                            ? "bg-[#EDF3F0] text-[#3A7A5C] hover:bg-[#D8EDD8]"
+                            : "bg-[#F5F4F2] text-[#B8AFA7] hover:bg-[#F0EBF8] hover:text-[#5B2D8E]"
+                        }`}
+                      >
+                        {lesson.is_published ? "Veröffentlicht" : "Entwurf"}
+                      </button>
+                    </form>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-2">
