@@ -161,7 +161,7 @@ export async function getAdminLessons(): Promise<AdminLesson[]> {
       cover_gradient, duration_seconds, sort_order, is_published, created_at, updated_at,
       categories!inner(name, slug)
     `)
-    .order("categories(sort_order)")
+    .order("category_id")
     .order("sort_order")
 
   return (data ?? []).map((l: any) => ({
