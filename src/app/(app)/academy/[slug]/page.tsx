@@ -1,9 +1,10 @@
 import Link from "next/link"
 import { ArrowLeft, Play, CheckCircle2, Circle, Clock } from "lucide-react"
-import { getCategoryBySlug, getCategories, lessonCount, isFoundation, type Lesson } from "@/lib/data/academy"
+import { getCategoryWithLessons, formatDuration, type ContentLesson } from "@/lib/supabase/content"
 import { getProfile } from "@/lib/supabase/profile"
 import { getLessonsWithProgress, getCategoryProgress, type LessonProgress } from "@/lib/supabase/progress"
 import { MediaCover } from "@/components/features/MediaCover"
+import { notFound } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
@@ -40,10 +41,10 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const category = getCategoryBySlug(slug)
-  if (!category) return null
+  const category = await getCategoryWithLessons(slug)
+  if (!category) notFound()
 
-  const foundation = isFoundation(category)
+  const foundation = category.type === "foundation"
 
   const profile   = await getProfile()
   const dbLessons = profile ? await getLessonsWithProgress(profile.id, slug) : []
@@ -63,10 +64,10 @@ export default async function CategoryPage({
       {/* Hero */}
       <section className="rounded-2xl overflow-hidden border border-[#E8E2D9]">
         <MediaCover
-          gradient={category.cover}
-          imageSrc={category.heroImage}
-          index={foundation ? category.index : undefined}
-          objectPosition={category.slug === "produktwissen" ? "center center" : "center 35%"}
+          gradient={category.cover_gradient ?? "from-[#B0A898] to-[#8C8070]"}
+          imageSrc={category.hero_image_url ?? undefined}
+          index={foundation ? (category.index_label ?? undefined) : undefined}
+          objectPosition={slug === "produktwissen" ? "center center" : "center 35%"}
           sizes="(max-width: 768px) 100vw, calc(100vw - 280px)"
           priority
           className="h-56 sm:h-80"
@@ -74,7 +75,7 @@ export default async function CategoryPage({
 
         <div className="bg-[#F5F0E8] px-8 py-7">
           <p className="text-[10px] font-semibold text-[#5B2D8E] uppercase tracking-widest mb-3">
-            {foundation ? category.tagline : "Wissensbibliothek"}
+            {foundation ? (category.tagline ?? "") : "Wissensbibliothek"}
           </p>
           <h1 className="text-[1.65rem] sm:text-[2rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
             {category.name}
@@ -123,7 +124,8 @@ export default async function CategoryPage({
                 className="group flex flex-col sm:flex-row bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl overflow-hidden transition-all hover:shadow-sm"
               >
                 <MediaCover
-                  gradient={lesson.cover}
+                  gradient={lesson.cover_gradient ?? "from-[#B0A898] to-[#8C8070]"}
+                  imageSrc={lesson.thumbnail_url ?? undefined}
                   index={foundation ? String(i + 1).padStart(2, "0") : undefined}
                   className="w-full sm:w-52 h-36 sm:h-auto shrink-0"
                 >
@@ -142,7 +144,7 @@ export default async function CategoryPage({
                   <div className="mt-4 flex items-center gap-4 flex-wrap">
                     <span className="flex items-center gap-1.5 text-[12px] text-[#B8AFA7]">
                       <Clock className="w-3 h-3" strokeWidth={1.75} />
-                      {lesson.duration}
+                      {formatDuration(lesson.duration_seconds)}
                     </span>
                     {foundation && <LessonStatus dbLesson={dbLesson} />}
                   </div>

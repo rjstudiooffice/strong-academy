@@ -1,7 +1,3 @@
-// ─── Config ──────────────────────────────────────────────────────────────────
-
-export const UNLOCK_THRESHOLD = 75   // % overall progress required
-
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type LeadershipCategory = {
@@ -90,21 +86,6 @@ export function getLeadershipCategoryBySlug(slug: string): LeadershipCategory | 
   return CATEGORIES.find((c) => c.slug === slug)
 }
 
-// Leadership unlock is now DB-backed via profiles.leadership_unlocked.
-// These helpers remain for future use when the unlock logic is wired to DB.
-export function isLeadershipUnlocked(): boolean {
-  return false
-}
-
-export function getProgressToUnlock(currentPct = 0): { current: number; needed: number; remaining: number; pct: number } {
-  const needed = UNLOCK_THRESHOLD
-  return {
-    current:   currentPct,
-    needed,
-    remaining: Math.max(0, needed - currentPct),
-    pct:       Math.min(100, Math.round((currentPct / needed) * 100)),
-  }
-}
 
 export type LeadershipLesson = LeadershipCategory["lessons"][number]
 

@@ -2,16 +2,17 @@ import { ArrowRight } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
 import Link from "next/link"
-import { getCategories, getFoundationCategories, isFoundation } from "@/lib/data/academy"
+import { getAcademyCategories } from "@/lib/supabase/content"
 import { CurrentDate } from "@/components/features/CurrentDate"
 import { InviteButton } from "@/components/features/InviteButton"
 import { getProfile, profileFirstName } from "@/lib/supabase/profile"
 import { getOverallProgress, getFoundationCategoryProgress } from "@/lib/supabase/progress"
 
+export const dynamic = "force-dynamic"
+
 export default async function HomePage() {
-  const profile    = await getProfile()
+  const [profile, categories] = await Promise.all([getProfile(), getAcademyCategories()])
   const firstName  = profile ? profileFirstName(profile) : ""
-  const categories = getCategories()
 
   const [overall, foundationProgress] = profile
     ? await Promise.all([
@@ -23,16 +24,15 @@ export default async function HomePage() {
         [] as { slug: string; completed: number; total: number; pct: number }[],
       ]
 
+  const nameBySlug = Object.fromEntries(categories.map((c) => [c.slug, c.name]))
+
   // Map slug → pct for the category grid
   const progressBySlug = Object.fromEntries(foundationProgress.map((c) => [c.slug, c.pct]))
 
   // Only show categories with actual progress in the per-category panel
   const activeProgress = foundationProgress
     .filter((c) => c.pct > 0)
-    .map((c) => ({
-      name: getFoundationCategories().find((fc) => fc.slug === c.slug)?.name ?? c.slug,
-      pct:  c.pct,
-    }))
+    .map((c) => ({ name: nameBySlug[c.slug] ?? c.slug, pct: c.pct }))
     .sort((a, b) => b.pct - a.pct)
 
   return (
@@ -147,7 +147,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {categories.map((cat) => {
             const pct        = progressBySlug[cat.slug] ?? 0
-            const foundation = isFoundation(cat)
+            const foundation = cat.type === "foundation"
             return (
               <Link
                 key={cat.slug}
@@ -160,7 +160,7 @@ export default async function HomePage() {
                   </p>
                   {foundation && (
                     <span className="text-[11px] font-medium text-[#C4B9B0] tabular-nums shrink-0 mt-0.5">
-                      {cat.index}
+                      {cat.index_label}
                     </span>
                   )}
                 </div>

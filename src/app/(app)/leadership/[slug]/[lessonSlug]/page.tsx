@@ -1,23 +1,12 @@
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, Play, Clock } from "lucide-react"
-import {
-  getLeadershipLessonContext,
-  getAllLeadershipLessonParams,
-  isLeadershipUnlocked,
-  type LeadershipLesson,
-} from "@/lib/data/leadership"
+import { getLessonNavContext, formatDuration } from "@/lib/supabase/content"
+import { getProfile } from "@/lib/supabase/profile"
 import { notFound, redirect } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { MediaCover } from "@/components/features/MediaCover"
 
-export function generateStaticParams() {
-  return getAllLeadershipLessonParams()
-}
-
-function LessonDot({ isCurrent }: { lesson: LeadershipLesson; isCurrent: boolean }) {
-  if (isCurrent) return <span className="w-1.5 h-1.5 rounded-full bg-[#9B72CC] shrink-0" />
-  return <span className="w-1.5 h-1.5 rounded-full border border-[#4A4438] shrink-0" />
-}
+export const dynamic = "force-dynamic"
 
 export default async function LeadershipLessonPage({
   params,
@@ -25,12 +14,14 @@ export default async function LeadershipLessonPage({
   params: Promise<{ slug: string; lessonSlug: string }>
 }) {
   const { slug, lessonSlug } = await params
-  if (!isLeadershipUnlocked()) redirect("/leadership")
 
-  const ctx = getLeadershipLessonContext(slug, lessonSlug)
-  if (!ctx) notFound()
+  const profile = await getProfile()
+  if (!profile?.leadership_unlocked) redirect("/leadership")
 
-  const { category, lesson, index, prev, next } = ctx
+  const ctx = await getLessonNavContext(slug, lessonSlug)
+  if (!ctx || ctx.category.type !== "leadership") notFound()
+
+  const { category, lesson, index, prev, next, allLessons } = ctx
 
   return (
     <div className="space-y-8 pt-2">
@@ -46,41 +37,39 @@ export default async function LeadershipLessonPage({
       {/* Video */}
       <section>
         <div className="rounded-2xl shadow-[0_8px_48px_rgba(0,0,0,0.5),_0_2px_8px_rgba(0,0,0,0.3)]">
-          <MediaCover gradient={lesson.cover} className="aspect-video w-full rounded-2xl">
-            <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-4">
-              <span className="text-[11px] font-semibold text-white/65 uppercase tracking-widest">
-                {String(index + 1).padStart(2, "0")} / {String(category.lessons.length).padStart(2, "0")}
-              </span>
-              <span className="flex items-center gap-1.5 bg-black/25 backdrop-blur-sm px-3 py-1 rounded-full">
-                <Clock className="w-3 h-3 text-white/70" strokeWidth={1.75} />
-                <span className="text-[11px] font-medium text-white/70">{lesson.duration}</span>
-              </span>
+          {lesson.video_url ? (
+            <div className="aspect-video w-full rounded-2xl overflow-hidden">
+              <iframe
+                src={lesson.video_url}
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
             </div>
-
-            <button className="absolute inset-0 flex items-center justify-center group/play">
-              <span className="
-                w-16 h-16 rounded-full
-                bg-white/20 backdrop-blur-md
-                ring-1 ring-white/20
-                flex items-center justify-center
-                shadow-[0_4px_24px_rgba(0,0,0,0.4)]
-                group-hover/play:bg-white/30 group-hover/play:scale-105
-                transition-all duration-200 ease-out
-              ">
-                <Play className="w-6 h-6 text-white ml-1" fill="currentColor" strokeWidth={0} />
-              </span>
-            </button>
-
-            <div className="absolute bottom-0 left-0 right-0 px-6 pb-5 pt-10
-              bg-gradient-to-t from-black/50 via-black/15 to-transparent">
-              <p className="text-[10px] font-semibold text-white/50 uppercase tracking-widest mb-1.5">
-                {category.tagline}
-              </p>
-              <p className="text-[15px] font-semibold text-white/90 leading-snug">
-                {lesson.title}
-              </p>
-            </div>
-          </MediaCover>
+          ) : (
+            <MediaCover gradient={lesson.cover_gradient ?? "from-[#4A4440] to-[#2C2820]"} className="aspect-video w-full rounded-2xl">
+              <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-4">
+                <span className="text-[11px] font-semibold text-white/65 uppercase tracking-widest">
+                  {String(index + 1).padStart(2, "0")} / {String(allLessons.length).padStart(2, "0")}
+                </span>
+                <span className="flex items-center gap-1.5 bg-black/25 backdrop-blur-sm px-3 py-1 rounded-full">
+                  <Clock className="w-3 h-3 text-white/70" strokeWidth={1.75} />
+                  <span className="text-[11px] font-medium text-white/70">{formatDuration(lesson.duration_seconds)}</span>
+                </span>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+                  <Play className="w-6 h-6 text-white ml-1" fill="currentColor" strokeWidth={0} />
+                </span>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 px-6 pb-5 pt-10 bg-gradient-to-t from-black/50 via-black/15 to-transparent">
+                <p className="text-[10px] font-semibold text-white/50 uppercase tracking-widest mb-1.5">
+                  {category.tagline}
+                </p>
+                <p className="text-[15px] font-semibold text-white/90 leading-snug">{lesson.title}</p>
+              </div>
+            </MediaCover>
+          )}
         </div>
       </section>
 
@@ -100,7 +89,6 @@ export default async function LeadershipLessonPage({
             </p>
           </div>
 
-          {/* Prev / Next */}
           <div className="flex items-center justify-between pt-6 border-t border-[#38322A]">
             {prev ? (
               <Link href={`/leadership/${slug}/${prev.slug}`} className="flex items-center gap-3 group max-w-[45%]">
@@ -134,11 +122,11 @@ export default async function LeadershipLessonPage({
             <p className="text-[10px] font-semibold text-[#6B6050] uppercase tracking-widest">
               {category.name}
             </p>
-            <p className="mt-1 text-[12px] text-[#4A4438]">{category.lessons.length} Lektionen</p>
+            <p className="mt-1 text-[12px] text-[#4A4438]">{allLessons.length} Lektionen</p>
           </div>
 
           <div className="space-y-0.5">
-            {category.lessons.map((l, i) => {
+            {allLessons.map((l, i) => {
               const isCurrent = l.slug === lessonSlug
               return (
                 <Link
@@ -159,9 +147,12 @@ export default async function LeadershipLessonPage({
                     )}>
                       {l.title}
                     </p>
-                    <p className="mt-0.5 text-[11px] text-[#6B6050]">{l.duration}</p>
+                    <p className="mt-0.5 text-[11px] text-[#6B6050]">{formatDuration(l.duration_seconds)}</p>
                   </div>
-                  <LessonDot lesson={l} isCurrent={isCurrent} />
+                  {isCurrent
+                    ? <span className="w-1.5 h-1.5 rounded-full bg-[#9B72CC] shrink-0" />
+                    : <span className="w-1.5 h-1.5 rounded-full border border-[#4A4438] shrink-0" />
+                  }
                 </Link>
               )
             })}

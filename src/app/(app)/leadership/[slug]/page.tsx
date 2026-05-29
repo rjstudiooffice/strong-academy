@@ -1,12 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft, Play, Clock } from "lucide-react"
-import { getLeadershipCategories, getLeadershipCategoryBySlug, isLeadershipUnlocked } from "@/lib/data/leadership"
+import { getCategoryWithLessons, formatDuration } from "@/lib/supabase/content"
+import { getProfile } from "@/lib/supabase/profile"
 import { MediaCover } from "@/components/features/MediaCover"
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
 
-export function generateStaticParams() {
-  return getLeadershipCategories().map((cat) => ({ slug: cat.slug }))
-}
+export const dynamic = "force-dynamic"
 
 export default async function LeadershipCategoryPage({
   params,
@@ -14,10 +13,12 @@ export default async function LeadershipCategoryPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  if (!isLeadershipUnlocked()) redirect("/leadership")
 
-  const category = getLeadershipCategoryBySlug(slug)
-  if (!category) return null
+  const profile = await getProfile()
+  if (!profile?.leadership_unlocked) redirect("/leadership")
+
+  const category = await getCategoryWithLessons(slug)
+  if (!category || category.type !== "leadership") notFound()
 
   return (
     <div className="space-y-14 pt-2">
@@ -33,10 +34,10 @@ export default async function LeadershipCategoryPage({
       {/* Hero */}
       <section className="rounded-2xl overflow-hidden border border-[#38322A]">
         <MediaCover
-          gradient={category.cover}
-          imageSrc={category.heroImage}
+          gradient={category.cover_gradient ?? "from-[#4A4440] to-[#2C2820]"}
+          imageSrc={category.hero_image_url ?? undefined}
           darkTint
-          index={category.index}
+          index={category.index_label ?? undefined}
           objectPosition="center 35%"
           sizes="(max-width: 768px) 100vw, calc(100vw - 280px)"
           priority
@@ -74,7 +75,8 @@ export default async function LeadershipCategoryPage({
                 className="group flex flex-col sm:flex-row bg-[#242019] hover:bg-[#2C2820] border border-[#38322A] hover:border-[#4A4438] rounded-2xl overflow-hidden transition-all hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
               >
                 <MediaCover
-                  gradient={lesson.cover}
+                  gradient={lesson.cover_gradient ?? "from-[#4A4440] to-[#2C2820]"}
+                  imageSrc={lesson.thumbnail_url ?? undefined}
                   index={String(i + 1).padStart(2, "0")}
                   className="w-full sm:w-52 h-36 sm:h-auto shrink-0"
                 >
@@ -92,7 +94,7 @@ export default async function LeadershipCategoryPage({
                   <div className="mt-4">
                     <span className="flex items-center gap-1.5 text-[12px] text-[#6B6050]">
                       <Clock className="w-3 h-3" strokeWidth={1.75} />
-                      {lesson.duration}
+                      {formatDuration(lesson.duration_seconds)}
                     </span>
                   </div>
                 </div>

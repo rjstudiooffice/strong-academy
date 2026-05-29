@@ -1,10 +1,6 @@
 import { Search } from "lucide-react"
 import Link from "next/link"
-import {
-  getFoundationCategories,
-  getLibraryCategories,
-  lessonCount,
-} from "@/lib/data/academy"
+import { getAcademyCategories } from "@/lib/supabase/content"
 import { getProfile } from "@/lib/supabase/profile"
 import { getFoundationCategoryProgress } from "@/lib/supabase/progress"
 import { MediaCover } from "@/components/features/MediaCover"
@@ -12,10 +8,14 @@ import { MediaCover } from "@/components/features/MediaCover"
 export const dynamic = "force-dynamic"
 
 export default async function AcademyPage() {
-  const foundation = getFoundationCategories()
-  const library    = getLibraryCategories()
+  const [categories, profile] = await Promise.all([
+    getAcademyCategories(),
+    getProfile(),
+  ])
 
-  const profile     = await getProfile()
+  const foundation = categories.filter((c) => c.type === "foundation")
+  const library    = categories.filter((c) => c.type === "library")
+
   const catProgress = profile ? await getFoundationCategoryProgress(profile.id) : []
   const progressMap = Object.fromEntries(catProgress.map((c) => [c.slug, c]))
 
@@ -32,7 +32,7 @@ export default async function AcademyPage() {
         </h1>
       </section>
 
-      {/* ── Foundation Academy ─────────────────────────────────────────────── */}
+      {/* Foundation Academy */}
       <section>
         <div className="mb-6">
           <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1">
@@ -52,11 +52,16 @@ export default async function AcademyPage() {
                 href={`/academy/${cat.slug}`}
                 className="group rounded-2xl overflow-hidden border border-[#E8E2D9] hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex flex-col"
               >
-                <MediaCover gradient={cat.cover} imageSrc={cat.coverImage} index={cat.index} className="h-44 shrink-0" />
+                <MediaCover
+                  gradient={cat.cover_gradient ?? "from-[#B0A898] to-[#8C8070]"}
+                  imageSrc={cat.cover_image_url ?? undefined}
+                  index={cat.index_label ?? undefined}
+                  className="h-44 shrink-0"
+                />
                 <div className="bg-[#F5F0E8] px-6 py-5 flex flex-col flex-1">
                   <div className="flex-1">
                     <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-2">
-                      {lessonCount(cat) > 0 ? `${lessonCount(cat)} ${lessonCount(cat) === 1 ? "Lektion" : "Lektionen"}` : "Folgt"}
+                      {cat.lesson_count > 0 ? `${cat.lesson_count} ${cat.lesson_count === 1 ? "Lektion" : "Lektionen"}` : "Folgt"}
                     </p>
                     <h3 className="text-[16px] font-semibold text-[#1A1714] leading-snug hyphens-auto">
                       {cat.name}
@@ -84,7 +89,7 @@ export default async function AcademyPage() {
         </div>
       </section>
 
-      {/* ── Wissensbibliothek ──────────────────────────────────────────────── */}
+      {/* Wissensbibliothek */}
       <section>
         <div className="mb-7">
           <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1">
@@ -92,7 +97,6 @@ export default async function AcademyPage() {
           </p>
         </div>
 
-        {/* Dezente Suche */}
         <form action="/suche" method="get" className="mb-7 max-w-sm">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#C4B9B0] pointer-events-none" strokeWidth={1.75} />
@@ -112,10 +116,14 @@ export default async function AcademyPage() {
               href={`/academy/${cat.slug}`}
               className="group rounded-2xl overflow-hidden border border-[#E8E2D9] hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex flex-col"
             >
-              <MediaCover gradient={cat.cover} imageSrc={cat.coverImage} className="h-40 shrink-0" />
+              <MediaCover
+                gradient={cat.cover_gradient ?? "from-[#B0A898] to-[#8C8070]"}
+                imageSrc={cat.cover_image_url ?? undefined}
+                className="h-40 shrink-0"
+              />
               <div className="bg-[#F5F0E8] px-6 py-5 flex flex-col flex-1">
                 <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-2">
-                  {cat.tagline}
+                  {cat.tagline ?? "Wissensbibliothek"}
                 </p>
                 <h3 className="text-[16px] font-semibold text-[#1A1714] leading-snug hyphens-auto">
                   {cat.name}
@@ -124,7 +132,7 @@ export default async function AcademyPage() {
                   {cat.description}
                 </p>
                 <p className="mt-4 text-[12px] text-[#C4B9B0]">
-                  Inhalte folgen
+                  {cat.lesson_count > 0 ? `${cat.lesson_count} Lektionen` : "Inhalte folgen"}
                 </p>
               </div>
             </Link>

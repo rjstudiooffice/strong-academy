@@ -80,6 +80,58 @@ export async function createInvitation(): Promise<{ token: string } | { error: s
   return { token }
 }
 
+// Foundation slugs that must all be at 100% to unlock Leadership
+const LEADERSHIP_REQUIRED_SLUGS = ["produktwissen", "teamaufbau", "kommunikation"]
+
+async function checkAndUnlockLeadership(userId: string): Promise<void> {
+  const supabase = await createClient()
+
+  // Get all foundation categories with the required slugs
+  const { data: cats } = await supabase
+    .from("categories")
+    .select("id, slug")
+    .in("slug", LEADERSHIP_REQUIRED_SLUGS)
+    .eq("type", "foundation")
+    .eq("is_active", true)
+
+  if (!cats || cats.length < LEADERSHIP_REQUIRED_SLUGS.length) return
+
+  const catIds = cats.map((c) => c.id)
+
+  // Get all published lessons in these categories
+  const { data: lessons } = await supabase
+    .from("lessons")
+    .select("id, category_id")
+    .in("category_id", catIds)
+    .eq("is_published", true)
+
+  if (!lessons || lessons.length === 0) return
+
+  // Check if all lessons are completed for the user
+  const lessonIds = lessons.map((l) => l.id)
+  const { count: completedCount } = await supabase
+    .from("lesson_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .in("lesson_id", lessonIds)
+    .eq("completed", true)
+
+  if ((completedCount ?? 0) < lessonIds.length) return
+
+  // All lessons in all 3 required foundation categories completed — unlock Leadership
+  const { createAdminClient } = await import("./admin")
+  const admin = createAdminClient()
+  const now   = new Date().toISOString()
+
+  await Promise.all([
+    admin.from("profiles").update({ leadership_unlocked: true }).eq("id", userId),
+    admin.from("leadership_unlocks").upsert(
+      { user_id: userId, unlocked: true, unlocked_at: now },
+      { onConflict: "user_id" }
+    ),
+  ])
+}
+
 export async function saveProgress(
   lessonId: string,
   progressPercent: number
@@ -105,6 +157,11 @@ export async function saveProgress(
       },
       { onConflict: "user_id,lesson_id" }
     )
+
+  // Check Leadership unlock whenever a lesson is completed
+  if (completed) {
+    await checkAndUnlockLeadership(user.id)
+  }
 }
 
 export async function removePartner(partnerId: string): Promise<{ error?: string }> {

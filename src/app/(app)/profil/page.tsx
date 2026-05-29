@@ -1,4 +1,3 @@
-import { getFoundationCategories } from "@/lib/data/academy"
 import { getProfile, profileInitials } from "@/lib/supabase/profile"
 import { getOverallProgress, getFoundationCategoryProgress } from "@/lib/supabase/progress"
 import { LogoutButton } from "@/components/features/LogoutButton"
@@ -23,7 +22,13 @@ export default async function ProfilPage() {
       ])
     : [{ completed: 0, total: 0, pct: 0 }, [] as { slug: string; completed: number; total: number; pct: number }[]]
 
-  const foundation       = getFoundationCategories()
+  // Foundation slugs — used only for count and name display
+  const FOUNDATION_COUNT = 3
+  const FOUNDATION_NAMES: Record<string, string> = {
+    produktwissen: "Produktwissen",
+    teamaufbau:    "Teamaufbau & Führung",
+    kommunikation: "Kommunikation & Kundenaufbau",
+  }
   const activeCategories = catProgress.filter((c) => c.pct > 0)
 
   const overallPct   = overall.pct
@@ -76,7 +81,7 @@ export default async function ProfilPage() {
                     </p>
                     <p className="text-[1.4rem] font-semibold text-[#1A1714] leading-none tracking-tight">
                       {activeCategories.length}
-                      <span className="text-[0.9rem] text-[#B8AFA7] font-normal ml-1">/ {foundation.length}</span>
+                      <span className="text-[0.9rem] text-[#B8AFA7] font-normal ml-1">/ {FOUNDATION_COUNT}</span>
                     </p>
                   </div>
                 </>
@@ -107,7 +112,7 @@ export default async function ProfilPage() {
           <div className="bg-[#F5F0E8] rounded-2xl border border-[#E8E2D9] px-6 py-6">
             <div className="space-y-5">
               {activeCategories.map((cat) => {
-                const name = foundation.find((fc) => fc.slug === cat.slug)?.name ?? cat.slug
+                const name = FOUNDATION_NAMES[cat.slug] ?? cat.slug
                 return (
                   <div key={cat.slug}>
                     <div className="flex items-baseline justify-between mb-2">

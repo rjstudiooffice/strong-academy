@@ -1,35 +1,50 @@
 import Link from "next/link"
 import { ArrowUpRight, FileText } from "lucide-react"
-import {
-  RESOURCE_CATEGORIES,
-  getResourcesByCategory,
-  getHandouts,
-  type Resource,
-  type Handout,
-} from "@/lib/data/resources"
+import { getResources, type ContentResource } from "@/lib/supabase/content"
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+export const dynamic = "force-dynamic"
 
-function FileTypeBadge({ type }: { type: Resource["fileType"] }) {
-  const colors: Record<string, string> = {
-    PDF:  "bg-[#F0EBF8] text-[#5B2D8E]",
-    PPTX: "bg-[#EDF3F0] text-[#3A7A5C]",
-    JPEG: "bg-[#F5EFE8] text-[#8A6040]",
-  }
-  return (
-    <span className={`inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-md tracking-wider ${colors[type] ?? colors.PDF}`}>
-      {type}
-    </span>
-  )
+const RESOURCE_CATEGORIES = [
+  {
+    id:          "produktinformationen",
+    label:       "Produktinformationen",
+    description: "Fachliche Unterlagen zu Strong OG — für dein Wissen und deine Gespräche.",
+  },
+  {
+    id:          "infomaterial-kunden",
+    label:       "Infomaterial für Kunden",
+    description: "Professionell aufbereitete Unterlagen für Kundengespräche und persönliche Weitergabe.",
+  },
+  {
+    id:          "gesundheitskonzept",
+    label:       "Gesundheitskonzept",
+    description: "Vorlagen, Fragebögen und strukturierte Unterlagen für die individuelle Gesundheitsberatung deiner Kunden.",
+  },
+]
+
+const FILE_COLORS: Record<string, string> = {
+  PDF:  "bg-[#F0EBF8] text-[#5B2D8E]",
+  PPTX: "bg-[#EDF3F0] text-[#3A7A5C]",
+  JPEG: "bg-[#F5EFE8] text-[#8A6040]",
+  PNG:  "bg-[#F5EFE8] text-[#8A6040]",
+  DOCX: "bg-[#F5EFE8] text-[#8A6040]",
 }
 
-function ResourceCard({ resource }: { resource: Resource }) {
+function ResourceCard({ resource }: { resource: ContentResource }) {
+  const fileType = resource.file_type ?? "PDF"
   return (
-    <div className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl p-6 flex flex-col transition-all hover:shadow-sm">
+    <a
+      href={resource.file_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-2xl p-6 flex flex-col transition-all hover:shadow-sm"
+    >
       <div className="flex items-start justify-between gap-3 mb-4">
-        <FileTypeBadge type={resource.fileType} />
-        {resource.fileSize && (
-          <span className="text-[11px] text-[#C4B9B0] tabular-nums shrink-0">{resource.fileSize}</span>
+        <span className={`inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-md tracking-wider ${FILE_COLORS[fileType] ?? FILE_COLORS.PDF}`}>
+          {fileType}
+        </span>
+        {resource.file_size && (
+          <span className="text-[11px] text-[#C4B9B0] tabular-nums shrink-0">{resource.file_size}</span>
         )}
       </div>
 
@@ -37,48 +52,20 @@ function ResourceCard({ resource }: { resource: Resource }) {
         <h3 className="text-[15px] font-semibold text-[#1A1714] leading-snug">
           {resource.title}
         </h3>
-        <p className="mt-2 text-[13px] text-[#9E9188] leading-relaxed">
-          {resource.description}
-        </p>
+        {resource.description && (
+          <p className="mt-2 text-[13px] text-[#9E9188] leading-relaxed">
+            {resource.description}
+          </p>
+        )}
       </div>
 
       <div className="mt-5 pt-4 border-t border-[#EDE8DF]">
-        <button className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#5B2D8E] hover:text-[#4A2478] transition-colors group-hover:gap-2">
+        <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#5B2D8E] group-hover:gap-2 transition-all">
           Ansehen
           <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={2} />
-        </button>
+        </span>
       </div>
-    </div>
-  )
-}
-
-function HandoutRow({ handout }: { handout: Handout }) {
-  const inner = (
-    <div className="group flex items-start justify-between gap-4 bg-[#F5F0E8] hover:bg-[#EDE8DF] border border-[#E8E2D9] rounded-xl px-5 py-4 transition-all cursor-pointer">
-      <div className="flex items-start gap-3 min-w-0">
-        <FileText className="w-4 h-4 text-[#C4B9B0] mt-0.5 shrink-0" strokeWidth={1.5} />
-        <div className="min-w-0">
-          <p className="text-[14px] font-medium text-[#1A1714] leading-snug">
-            {handout.title}
-          </p>
-          <p className="mt-1 text-[12px] text-[#9E9188] leading-relaxed">
-            {handout.description}
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-3 shrink-0">
-        {handout.fileSize && (
-          <span className="text-[11px] text-[#C4B9B0] tabular-nums hidden sm:block">{handout.fileSize}</span>
-        )}
-        <ArrowUpRight className="w-3.5 h-3.5 text-[#C4B9B0] group-hover:text-[#5B2D8E] transition-colors" strokeWidth={2} />
-      </div>
-    </div>
-  )
-
-  return handout.relatedLesson ? (
-    <Link href={handout.relatedLesson}>{inner}</Link>
-  ) : (
-    <>{inner}</>
+    </a>
   )
 }
 
@@ -93,15 +80,12 @@ function EmptyState() {
   )
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
-
-export default function RessourcenPage() {
-  const handouts = getHandouts()
+export default async function RessourcenPage() {
+  const allResources = await getResources()
 
   return (
     <div className="space-y-14">
 
-      {/* Hero */}
       <section className="pt-2">
         <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-5">
           Ressourcen
@@ -114,9 +98,8 @@ export default function RessourcenPage() {
         </p>
       </section>
 
-      {/* Resource Categories */}
       {RESOURCE_CATEGORIES.map((cat) => {
-        const items = getResourcesByCategory(cat.id)
+        const items = allResources.filter((r) => r.category === cat.id)
         return (
           <section key={cat.id}>
             <div className="mb-6">
@@ -139,27 +122,23 @@ export default function RessourcenPage() {
         )
       })}
 
-      {/* Handouts */}
-      <section>
-        <div className="mb-6">
-          <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1">
-            Handouts & Zusammenfassungen
-          </p>
-          <p className="text-[13px] text-[#9E9188]">
-            Kompakte Lernunterlagen — passend zu den Akademie-Lektionen.
-          </p>
-        </div>
-
-        {handouts.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="space-y-2">
-            {handouts.map((h) => (
-              <HandoutRow key={h.id} handout={h} />
-            ))}
+      {/* Uncategorized resources */}
+      {allResources.filter((r) => !RESOURCE_CATEGORIES.find((c) => c.id === r.category)).length > 0 && (
+        <section>
+          <div className="mb-6">
+            <p className="text-[10px] font-semibold text-[#B8AFA7] uppercase tracking-widest mb-1">
+              Weitere Unterlagen
+            </p>
           </div>
-        )}
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {allResources
+              .filter((r) => !RESOURCE_CATEGORIES.find((c) => c.id === r.category))
+              .map((resource) => (
+                <ResourceCard key={resource.id} resource={resource} />
+              ))}
+          </div>
+        </section>
+      )}
 
     </div>
   )
