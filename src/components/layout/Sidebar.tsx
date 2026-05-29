@@ -9,9 +9,9 @@ import { Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { logout } from "@/lib/supabase/actions"
 
-type Props = { showTeam: boolean; leadershipUnlocked: boolean }
+type Props = { showTeam: boolean; leadershipUnlocked: boolean; isAdmin: boolean }
 
-export function Sidebar({ showTeam, leadershipUnlocked }: Props) {
+export function Sidebar({ showTeam, leadershipUnlocked, isAdmin }: Props) {
   const pathname = usePathname()
 
   const allItems = [
@@ -71,7 +71,16 @@ export function Sidebar({ showTeam, leadershipUnlocked }: Props) {
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 pb-6 border-t border-[#E8E2D9] pt-3 mt-3">
+      <div className="px-3 pb-6 border-t border-[#E8E2D9] pt-3 mt-3 space-y-0.5">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#5B2D8E]/70 hover:bg-[#EDE8DF] hover:text-[#5B2D8E] transition-all duration-150"
+          >
+            <NavIcon name="settings" className="w-4 h-4 shrink-0 text-[#5B2D8E]/50" />
+            Admin
+          </Link>
+        )}
         <form action={logout}>
           <button type="submit" className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#6B5E52] hover:bg-[#EDE8DF] hover:text-[#1A1714] transition-all duration-150">
             <NavIcon name="logout" className="w-4 h-4 shrink-0 text-[#9E9188]" />

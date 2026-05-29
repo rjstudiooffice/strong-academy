@@ -236,6 +236,41 @@ export type AdminUserDetail = AdminUser & {
   sponsor_id: string | null
 }
 
+// ─── Invitations ─────────────────────────────────────────────────────────────
+
+export type AdminInvitation = {
+  id:         string
+  token:      string
+  created_by: string
+  creator_name: string | null
+  creator_email: string
+  use_count:  number
+  is_active:  boolean
+  expires_at: string
+  created_at: string
+}
+
+export async function getAdminInvitations(): Promise<AdminInvitation[]> {
+  const admin = createAdminClient()
+
+  const { data } = await admin
+    .from("invitations")
+    .select("id, token, created_by, use_count, is_active, expires_at, created_at, profiles!invitations_created_by_fkey(full_name, email)")
+    .order("created_at", { ascending: false })
+
+  return (data ?? []).map((row: any) => ({
+    id:            row.id,
+    token:         row.token,
+    created_by:    row.created_by,
+    creator_name:  row.profiles?.full_name ?? null,
+    creator_email: row.profiles?.email ?? "",
+    use_count:     row.use_count ?? 0,
+    is_active:     row.is_active ?? true,
+    expires_at:    row.expires_at,
+    created_at:    row.created_at,
+  }))
+}
+
 export async function getAdminUserById(id: string): Promise<AdminUserDetail | null> {
   const admin = createAdminClient()
 

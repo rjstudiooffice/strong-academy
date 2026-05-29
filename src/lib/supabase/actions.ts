@@ -2,7 +2,7 @@
 
 import { createClient } from "./server"
 import { redirect } from "next/navigation"
-import { validateToken, markInvitationUsed, setSponsor, setConsent } from "./invitations"
+import { validateToken, recordInvitationUse, setSponsor, setConsent } from "./invitations"
 
 export type AuthState = { error: string } | null
 
@@ -54,10 +54,10 @@ export async function register(prevState: AuthState, formData: FormData): Promis
 
   const userId = signUpData.user!.id
 
-  // Set sponsor and mark invitation as used in parallel via admin client (bypasses RLS)
+  // Set sponsor, track invitation use, record consent — in parallel
   await Promise.all([
     setSponsor(userId, invitation.sponsorId),
-    markInvitationUsed(token, userId),
+    recordInvitationUse(token),
     setConsent(userId),
   ])
 
@@ -70,7 +70,7 @@ export async function createInvitation(): Promise<{ token: string } | { error: s
   if (!user) return { error: "Nicht angemeldet." }
 
   const token     = crypto.randomUUID()
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
 
   const { error } = await supabase
     .from("invitations")

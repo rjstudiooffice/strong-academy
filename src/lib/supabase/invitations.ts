@@ -12,15 +12,15 @@ export async function validateToken(token: string): Promise<TokenValidation> {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from("invitations")
-    .select("id, created_by, used, expires_at")
+    .select("id, created_by, is_active, expires_at")
     .eq("token", token)
     .single()
 
   if (error || !data) {
     return { valid: false, reason: "Diese Einladung ist nicht mehr gültig." }
   }
-  if (data.used) {
-    return { valid: false, reason: "Diese Einladung wurde bereits verwendet." }
+  if (!data.is_active) {
+    return { valid: false, reason: "Diese Einladung wurde deaktiviert." }
   }
   if (new Date(data.expires_at) < new Date()) {
     return { valid: false, reason: "Diese Einladung ist abgelaufen." }
@@ -29,12 +29,11 @@ export async function validateToken(token: string): Promise<TokenValidation> {
   return { valid: true, invitationId: data.id, sponsorId: data.created_by }
 }
 
-export async function markInvitationUsed(token: string, usedBy: string): Promise<void> {
+// Tracks that someone used this invitation — increments counter but does NOT
+// mark it as consumed, so the link stays valid for future registrants.
+export async function recordInvitationUse(token: string): Promise<void> {
   const admin = createAdminClient()
-  await admin
-    .from("invitations")
-    .update({ used: true, used_by: usedBy })
-    .eq("token", token)
+  await admin.rpc("increment_invitation_use_count", { p_token: token })
 }
 
 export async function setSponsor(userId: string, sponsorId: string): Promise<void> {
@@ -44,8 +43,6 @@ export async function setSponsor(userId: string, sponsorId: string): Promise<voi
     .update({ sponsor_id: sponsorId })
     .eq("id", userId)
   if (error) {
-    // Non-fatal: the DB trigger sets sponsor_id atomically on signup.
-    // Log so we can detect admin-client issues without blocking registration.
     console.error("[setSponsor] failed for user", userId, "—", error.message)
   }
 }

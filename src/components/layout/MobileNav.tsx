@@ -6,14 +6,15 @@ import { navItems } from "@/lib/nav"
 import { NavIcon } from "./NavIcon"
 import { cn } from "@/lib/utils"
 
-type Props = { showTeam: boolean; leadershipUnlocked: boolean }
+type Props = { showTeam: boolean; leadershipUnlocked: boolean; isAdmin: boolean }
 
-export function MobileNav({ showTeam, leadershipUnlocked }: Props) {
+export function MobileNav({ showTeam, leadershipUnlocked, isAdmin }: Props) {
   const pathname = usePathname()
 
   const allItems = [
     ...navItems,
-    ...(showTeam ? [{ label: "Team", href: "/team", icon: "users" }] : []),
+    ...(showTeam  ? [{ label: "Team",  href: "/team",  icon: "users"    }] : []),
+    ...(isAdmin   ? [{ label: "Admin", href: "/admin", icon: "settings" }] : []),
   ]
 
   return (

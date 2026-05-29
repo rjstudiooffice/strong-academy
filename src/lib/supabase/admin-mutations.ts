@@ -295,6 +295,37 @@ export async function toggleLeadershipUnlock(formData: FormData): Promise<void> 
   revalidatePath("/admin/benutzer")
 }
 
+// ─── Invitations ─────────────────────────────────────────────────────────────
+
+export async function toggleInvitationActive(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin  = createAdminClient()
+  const id       = formData.get("id") as string
+  const isActive = formData.get("is_active") === "true"
+
+  await admin.from("invitations").update({ is_active: !isActive }).eq("id", id)
+  revalidatePath("/admin/einladungen")
+}
+
+export async function deleteInvitation(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+  const id    = formData.get("id") as string
+
+  await admin.from("invitations").delete().eq("id", id)
+  revalidatePath("/admin/einladungen")
+}
+
+export async function extendInvitation(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin   = createAdminClient()
+  const id      = formData.get("id") as string
+  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+
+  await admin.from("invitations").update({ expires_at: expiresAt, is_active: true }).eq("id", id)
+  revalidatePath("/admin/einladungen")
+}
+
 export async function changeUserSponsor(formData: FormData): Promise<void> {
   await requireAdmin()
   const admin = createAdminClient()
