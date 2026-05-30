@@ -5,7 +5,7 @@ import { getProfile } from "@/lib/supabase/profile"
 import { getLessonsWithProgress, type LessonProgress } from "@/lib/supabase/progress"
 import { notFound } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { VideoPlayer } from "@/components/features/VideoPlayer"
+import { VideoPlayer, type NextLessonInfo } from "@/components/features/VideoPlayer"
 
 export const dynamic = "force-dynamic"
 
@@ -70,6 +70,10 @@ export default async function LessonPage({
   const catTotal     = dbLessons.length || allLessons.length
   const catPct       = catTotal > 0 ? Math.round((catCompleted / catTotal) * 100) : 0
 
+  const nextLessonInfo: NextLessonInfo | null = next
+    ? { title: next.title, thumbnailUrl: next.thumbnail_url, coverGradient: next.cover_gradient, href: `/academy/${slug}/${next.slug}` }
+    : null
+
   return (
     <div className="space-y-8 pt-2">
 
@@ -94,6 +98,7 @@ export default async function LessonPage({
         totalLessons={catTotal}
         initialProgress={progressPercent}
         initialCompleted={completed}
+        nextLesson={nextLessonInfo}
       />
 
       {/* Content + sidebar */}
