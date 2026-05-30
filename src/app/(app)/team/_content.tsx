@@ -49,6 +49,7 @@ function MemberCard({
 }) {
   const [confirming, setConfirming] = useState(false)
   const [removing,   setRemoving]   = useState(false)
+  const [imgError,   setImgError]   = useState(false)
 
   async function handleConfirm() {
     setRemoving(true)
@@ -103,9 +104,9 @@ function MemberCard({
 
         {/* Avatar */}
         <div className={`w-11 h-11 rounded-xl ${avatarColor(index)} flex items-center justify-center shrink-0 overflow-hidden`}>
-          {member.avatar_url ? (
+          {member.avatar_url && !imgError ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={member.avatar_url} alt="" className="w-full h-full object-cover" />
+            <img src={member.avatar_url} alt="" className="w-full h-full object-cover" onError={() => setImgError(true)} />
           ) : (
             <span className="text-white text-[13px] font-semibold">{initials(member.full_name)}</span>
           )}

@@ -187,6 +187,10 @@ export async function updateProfile(data: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Nicht angemeldet." }
 
+  if (data.avatarUrl && !data.avatarUrl.startsWith("https://")) {
+    return { error: "Ungültige Avatar-URL." }
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({ full_name: data.fullName, avatar_url: data.avatarUrl })

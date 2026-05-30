@@ -295,7 +295,8 @@ export async function getAdminUsers(search?: string): Promise<AdminUser[]> {
     .order("created_at", { ascending: false })
 
   if (search) {
-    query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`)
+    const safe = search.slice(0, 100)
+    query = query.or(`email.ilike.%${safe}%,full_name.ilike.%${safe}%`)
   }
 
   const { data } = await query
