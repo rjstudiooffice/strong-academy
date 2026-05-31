@@ -1,17 +1,64 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 
-export default function PasswortNeuPage() {
+// Handles both token flows Supabase may use:
+// 1. Implicit: #access_token=...&refresh_token=...&type=recovery (hash, client-only)
+// 2. PKCE:     ?code=xxx (query param, exchanged server- or client-side)
+function PasswortNeuInner() {
+  const [ready,   setReady]   = useState(false)
+  const [invalid, setInvalid] = useState(false)
   const [password,  setPassword]  = useState("")
   const [confirm,   setConfirm]   = useState("")
   const [error,     setError]     = useState<string | null>(null)
   const [pending,   setPending]   = useState(false)
   const [done,      setDone]      = useState(false)
-  const router = useRouter()
+
+  const router      = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    async function init() {
+      const supabase = createClient()
+
+      // ── PKCE code flow (from /auth/callback redirect) ────────────────────
+      const code = searchParams.get("code")
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (!error) { setReady(true); return }
+      }
+
+      // ── Implicit flow: hash fragment #access_token=...&type=recovery ─────
+      const hash = typeof window !== "undefined" ? window.location.hash : ""
+      if (hash) {
+        const params = new URLSearchParams(hash.slice(1))
+        const accessToken  = params.get("access_token")
+        const refreshToken = params.get("refresh_token")
+        const type         = params.get("type")
+
+        if (accessToken && refreshToken && type === "recovery") {
+          const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+          if (!error) {
+            window.history.replaceState(null, "", window.location.pathname)
+            setReady(true)
+            return
+          }
+        }
+      }
+
+      // ── Already authenticated (e.g. admin-generated link via /auth/callback)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) { setReady(true); return }
+
+      setInvalid(true)
+    }
+
+    init()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,21 +97,41 @@ export default function PasswortNeuPage() {
           <span className="text-[14px] font-semibold text-[#1A1714]">Strong Academy</span>
         </div>
 
-        <div className="mb-8">
-          <h1 className="text-[1.75rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
-            Neues Passwort.
-          </h1>
-          <p className="mt-2 text-[14px] text-[#9E9188] leading-relaxed">
-            Wähle ein sicheres Passwort mit mindestens 8 Zeichen.
-          </p>
-        </div>
-
-        {done ? (
-          <div className="px-4 py-3 bg-[#EDF3F0] border border-[#C0DACE] rounded-xl text-[13px] text-[#3A7A5C]">
-            Passwort gespeichert. Du wirst weitergeleitet …
+        {invalid ? (
+          <div className="space-y-4">
+            <h1 className="text-[1.75rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
+              Link ungültig.
+            </h1>
+            <p className="text-[14px] text-[#9E9188]">
+              Der Link ist abgelaufen oder wurde bereits verwendet.
+            </p>
+            <button
+              onClick={() => router.push("/login")}
+              className="text-[13px] text-[#9E9188] hover:text-[#5B2D8E] transition-colors"
+            >
+              ← Zurück zur Anmeldung
+            </button>
+          </div>
+        ) : !ready ? (
+          <p className="text-[14px] text-[#9E9188]">Link wird geprüft …</p>
+        ) : done ? (
+          <div className="space-y-4">
+            <h1 className="text-[1.75rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
+              Passwort gespeichert.
+            </h1>
+            <p className="text-[14px] text-[#9E9188]">Du wirst weitergeleitet …</p>
           </div>
         ) : (
           <>
+            <div className="mb-8">
+              <h1 className="text-[1.75rem] font-semibold text-[#1A1714] tracking-tight leading-tight">
+                Neues Passwort.
+              </h1>
+              <p className="mt-2 text-[14px] text-[#9E9188] leading-relaxed">
+                Wähle ein sicheres Passwort mit mindestens 8 Zeichen.
+              </p>
+            </div>
+
             {error && (
               <div className="mb-4 px-4 py-3 bg-[#FDF2F0] border border-[#E8C4BC] rounded-xl text-[13px] text-[#8A4A3C]">
                 {error}
@@ -117,5 +184,13 @@ export default function PasswortNeuPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function PasswortNeuPage() {
+  return (
+    <Suspense>
+      <PasswortNeuInner />
+    </Suspense>
   )
 }

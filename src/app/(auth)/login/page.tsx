@@ -19,7 +19,7 @@ function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
     setError(null)
 
     const supabase = createClient()
-    const redirectTo = `${window.location.origin}/auth/callback?next=/passwort-neu`
+    const redirectTo = `${window.location.origin}/passwort-neu`
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
 

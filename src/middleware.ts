@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 // Routes accessible without authentication
-const PUBLIC_ROUTES = ["/login", "/registrieren", "/einladung", "/datenschutz", "/agb", "/auth"]
+const PUBLIC_ROUTES = ["/login", "/registrieren", "/einladung", "/datenschutz", "/agb", "/auth", "/passwort-neu"]
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -42,7 +42,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // Authenticated user hitting an auth page → redirect to dashboard
-  if (user && isPublicRoute) {
+  // Exception: /passwort-neu must stay accessible after the recovery link sets the session
+  if (user && isPublicRoute && !pathname.startsWith("/passwort-neu")) {
     const url = request.nextUrl.clone()
     url.pathname = "/"
     return NextResponse.redirect(url)
