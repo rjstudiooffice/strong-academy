@@ -7,6 +7,7 @@ import { createAdminClient } from "./admin"
 import { createClient } from "./server"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 
@@ -478,4 +479,30 @@ export async function reorderLessonDown(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/lektionen")
   revalidatePath("/academy")
+}
+
+// ─── Password reset ───────────────────────────────────────────────────────────
+
+export async function generatePasswordResetLink(
+  email: string
+): Promise<{ link?: string; error?: string }> {
+  await requireAdmin()
+
+  const headersList = await headers()
+  const host = headersList.get("host") ?? "localhost:3000"
+  const protocol = host.includes("localhost") ? "http" : "https"
+  const redirectTo = `${protocol}://${host}/auth/callback?next=/passwort-neu`
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo },
+  })
+
+  if (error || !data?.properties?.action_link) {
+    return { error: error?.message ?? "Link konnte nicht generiert werden." }
+  }
+
+  return { link: data.properties.action_link }
 }

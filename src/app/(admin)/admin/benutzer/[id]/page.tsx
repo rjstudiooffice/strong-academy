@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { getAdminUserById, getAdminUsers } from "@/lib/supabase/admin-queries"
 import { changeUserSponsor } from "@/lib/supabase/admin-mutations"
+import { PasswordResetCard } from "./_password-reset"
 
 export const dynamic = "force-dynamic"
 
@@ -141,6 +142,8 @@ export default async function BenutzerDetailPage({
           </div>
         </form>
       </div>
+
+      <PasswordResetCard email={user.email} />
     </div>
   )
 }
