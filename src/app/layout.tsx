@@ -12,6 +12,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Strong Academy",
   description: "Dein persönliches Wissenszentrum für Gesundheit, Leadership und Wachstum.",
+  openGraph: {
+    title:       "Strong Academy",
+    description: "Dein persönliches Wissenszentrum für Gesundheit, Leadership und Wachstum.",
+    siteName:    "Strong Academy",
+    locale:      "de_DE",
+    type:        "website",
+  },
+  twitter: {
+    card:        "summary_large_image",
+    title:       "Strong Academy",
+    description: "Dein persönliches Wissenszentrum für Gesundheit, Leadership und Wachstum.",
+  },
 }
 
 export const viewport: Viewport = {
