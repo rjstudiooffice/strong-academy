@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react"
 import { getAdminCategories } from "@/lib/supabase/admin-queries"
 import { createLesson } from "@/lib/supabase/admin-mutations"
 import { AreaCategorySelect } from "@/components/admin/AreaCategorySelect"
+import { ImageUpload } from "@/components/admin/ImageUpload"
 
 export const dynamic = "force-dynamic"
 
@@ -60,11 +61,12 @@ export default async function NeueLektionPage() {
             <input name="sort_order" type="number" defaultValue={0} className={INPUT} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={LABEL}>Thumbnail URL</label>
-              <input name="thumbnail_url" type="text" placeholder="/thumbnails/lektion.jpg" className={INPUT} />
-            </div>
+          <div className="space-y-4">
+            <ImageUpload
+              name="thumbnail_url"
+              label="Thumbnail"
+              folder="lessons/thumbnails"
+            />
             <div>
               <label className={LABEL}>Cover-Gradient (Fallback)</label>
               <input name="cover_gradient" type="text" placeholder="from-[#A8C094] to-[#7E9E6A]" className={INPUT} />
