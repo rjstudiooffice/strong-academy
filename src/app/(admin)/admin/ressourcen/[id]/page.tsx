@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { getAdminResourceById } from "@/lib/supabase/admin-queries"
 import { updateResource } from "@/lib/supabase/admin-mutations"
+import { FileUpload } from "@/components/admin/FileUpload"
 
 export const dynamic = "force-dynamic"
 
@@ -48,39 +49,26 @@ export default async function RessourceBearbeitenPage({
           <textarea name="description" rows={2} defaultValue={res.description ?? ""} className={INPUT} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={LABEL}>Kategorie</label>
-            <select name="category" defaultValue={res.category ?? ""} className={INPUT}>
-              <option value="">— Keine Kategorie —</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.label}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={LABEL}>Dateityp</label>
-            <select name="file_type" defaultValue={res.file_type ?? ""} className={INPUT}>
-              <option value="">—</option>
-              <option value="PDF">PDF</option>
-              <option value="PPTX">PPTX</option>
-              <option value="DOCX">DOCX</option>
-              <option value="JPEG">JPEG</option>
-              <option value="PNG">PNG</option>
-            </select>
-          </div>
+        <div>
+          <label className={LABEL}>Kategorie</label>
+          <select name="category" defaultValue={res.category ?? ""} className={INPUT}>
+            <option value="">— Keine Kategorie —</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.label}</option>
+            ))}
+          </select>
         </div>
 
         <div>
-          <label className={LABEL}>Datei-URL *</label>
-          <input name="file_url" type="text" required defaultValue={res.file_url} className={INPUT} />
+          <label className={LABEL}>Datei</label>
+          <FileUpload
+            defaultUrl={res.file_url}
+            defaultFileType={res.file_type ?? ""}
+            defaultFileSize={res.file_size ?? ""}
+          />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className={LABEL}>Dateigröße</label>
-            <input name="file_size" type="text" defaultValue={res.file_size ?? ""} placeholder="2.4 MB" className={INPUT} />
-          </div>
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={LABEL}>Reihenfolge</label>
             <input name="sort_order" type="number" defaultValue={res.sort_order} className={INPUT} />
