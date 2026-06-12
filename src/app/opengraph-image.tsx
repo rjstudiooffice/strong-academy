@@ -47,6 +47,8 @@ export default async function Image() {
           </div>
           <div
             style={{
+              display:       "flex",
+              flexDirection: "column",
               fontSize:      30,
               fontWeight:    400,
               color:         "#5B2D8E",
@@ -54,8 +56,8 @@ export default async function Image() {
               lineHeight:    1.4,
             }}
           >
-            Dein Wissenszentrum für Gesundheit,
-            {"\n"}Leadership & Wachstum.
+            <span>Dein Wissenszentrum für Gesundheit,</span>
+            <span>Leadership & Wachstum.</span>
           </div>
         </div>
       </div>
