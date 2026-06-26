@@ -2,16 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FolderOpen, BookOpen, FileText, Users, Mail, ArrowLeft } from "lucide-react"
+import { LayoutDashboard, FolderOpen, BookOpen, FileText, Users, Mail, Settings, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const NAV = [
-  { href: "/admin",            label: "Dashboard",   icon: LayoutDashboard },
-  { href: "/admin/kategorien", label: "Kategorien",  icon: FolderOpen },
-  { href: "/admin/lektionen",  label: "Lektionen",   icon: BookOpen },
-  { href: "/admin/ressourcen", label: "Ressourcen",  icon: FileText },
-  { href: "/admin/benutzer",   label: "Benutzer",    icon: Users },
-  { href: "/admin/einladungen",label: "Einladungen", icon: Mail },
+  { href: "/admin",               label: "Dashboard",     icon: LayoutDashboard },
+  { href: "/admin/kategorien",    label: "Kategorien",    icon: FolderOpen },
+  { href: "/admin/lektionen",     label: "Lektionen",     icon: BookOpen },
+  { href: "/admin/ressourcen",    label: "Ressourcen",    icon: FileText },
+  { href: "/admin/benutzer",      label: "Benutzer",      icon: Users },
+  { href: "/admin/einladungen",   label: "Einladungen",   icon: Mail },
+  { href: "/admin/einstellungen", label: "Einstellungen", icon: Settings },
 ]
 
 export function AdminSidebar() {

@@ -259,6 +259,25 @@ export async function deleteResource(formData: FormData): Promise<void> {
   redirect("/admin/ressourcen")
 }
 
+// ─── App Settings ─────────────────────────────────────────────────────────────
+
+export async function updateAppSettings(formData: FormData): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+
+  const payload = {
+    welcome_video_id:               formData.get("video_id") as string || null,
+    welcome_video_url:              formData.get("video_url") as string || null,
+    welcome_video_duration_seconds: parseInt(formData.get("duration_seconds") as string) || null,
+  }
+
+  const { error } = await admin.from("app_settings").update(payload).eq("id", true)
+  if (error) throw new Error(error.message)
+
+  revalidatePath("/admin/einstellungen")
+  redirect("/admin/einstellungen")
+}
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export async function toggleUserActive(formData: FormData): Promise<void> {

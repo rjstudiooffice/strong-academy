@@ -200,6 +200,17 @@ export async function updateProfile(data: {
   return {}
 }
 
+export async function markWelcomeVideoSeen(): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase
+    .from("profiles")
+    .update({ welcome_video_seen: true, welcome_video_seen_at: new Date().toISOString() })
+    .eq("id", user.id)
+}
+
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()

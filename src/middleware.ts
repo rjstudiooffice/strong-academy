@@ -49,6 +49,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Welcome video gate — every user must watch it before using the app.
+  // Skipped for API routes so client-side fetches don't get redirected responses.
+  if (user && !isPublicRoute && !pathname.startsWith("/api")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("welcome_video_seen")
+      .eq("id", user.id)
+      .single()
+
+    const hasSeenWelcome = profile?.welcome_video_seen ?? true
+
+    if (!hasSeenWelcome && pathname !== "/willkommen") {
+      const url = request.nextUrl.clone()
+      url.pathname = "/willkommen"
+      return NextResponse.redirect(url)
+    }
+
+    if (hasSeenWelcome && pathname === "/willkommen") {
+      const url = request.nextUrl.clone()
+      url.pathname = "/"
+      return NextResponse.redirect(url)
+    }
+  }
+
   return supabaseResponse
 }
 

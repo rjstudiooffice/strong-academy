@@ -11,7 +11,7 @@ type BunnyVideo = {
 }
 
 interface Props {
-  prefix:                   string
+  prefix?:                  string
   defaultVideoId?:          string | null
   defaultVideoUrl?:         string | null
   defaultDurationSeconds?:  number | null
@@ -24,7 +24,7 @@ function fmt(seconds: number): string {
 }
 
 export function BunnyVideoPicker({
-  prefix,
+  prefix = "",
   defaultVideoId,
   defaultVideoUrl,
   defaultDurationSeconds,
@@ -33,9 +33,8 @@ export function BunnyVideoPicker({
   const [loading,  setLoading]  = useState(false)
   const [selected, setSelected] = useState<BunnyVideo | null>(null)
 
-  // Fetch videos when prefix changes
+  // Fetch videos when prefix changes — empty prefix lists all videos unfiltered
   useEffect(() => {
-    if (!prefix) return
     setLoading(true)
     setSelected(null)
 

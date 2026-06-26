@@ -233,3 +233,27 @@ export async function getResources(): Promise<ContentResource[]> {
 
   return (data ?? []) as ContentResource[]
 }
+
+// ─── App Settings ─────────────────────────────────────────────────────────────
+
+export type AppSettings = {
+  welcome_video_id: string | null
+  welcome_video_url: string | null
+  welcome_video_duration_seconds: number | null
+}
+
+export async function getAppSettings(): Promise<AppSettings> {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from("app_settings")
+    .select("welcome_video_id, welcome_video_url, welcome_video_duration_seconds")
+    .eq("id", true)
+    .single()
+
+  return data ?? {
+    welcome_video_id: null,
+    welcome_video_url: null,
+    welcome_video_duration_seconds: null,
+  }
+}
